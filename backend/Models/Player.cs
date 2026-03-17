@@ -8,8 +8,8 @@ public class Player
     public int SeatIndex { get; set; }
     public bool IsConnected { get; set; }
 
-    public Guid GameId { get; set; }
-    public Game Game { get; set; } = null!;
+    public Guid? GameId { get; set; }
+    public Game? Game { get; set; }
 
     public List<Card> Hand { get; set; } = [];
 }
