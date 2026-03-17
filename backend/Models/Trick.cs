@@ -1,3 +1,5 @@
+namespace WhistOnline.API.Models;
+
 public class CardPlay
 {
     public Guid Id { get; set; }

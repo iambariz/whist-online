@@ -1,3 +1,5 @@
+namespace WhistOnline.API.Models;
+
 public enum Suit
 {
     Clubs,

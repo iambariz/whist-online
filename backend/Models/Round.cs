@@ -1,3 +1,5 @@
+namespace WhistOnline.API.Models;
+
 public class Round
 {
     public Guid Id { get; set; }
