@@ -1,4 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using WhistOnline.API.Data;
+using WhistOnline.API.DTOs;
+using WhistOnline.API.Models;
+using WhistOnline.API.Services;
 
 namespace WhistOnline.API.Controllers;
 
@@ -6,11 +10,24 @@ namespace WhistOnline.API.Controllers;
 [Route("api/[controller]")]
 public class PlayerController : ControllerBase
 {
-    [HttpGet]
-    public IActionResult GetLobbies()
+    private readonly PlayerService _playerService;
+    public PlayerController(PlayerService playerService)                                                                                           
+    {               
+        _playerService = playerService;
+    }              
+    
+    [HttpGet("{id}")]                                                                                                                  
+    public IActionResult GetPlayer(Guid id)                                                                                            
+    {                    
+        var playerQuery = _playerService.FindPlayerByGuid(id);
+        
+        return playerQuery != null ? Ok(playerQuery) : NotFound();
+    }  
+
+    [HttpPost()]
+    public IActionResult AddPlayer([FromBody] CreatePlayerRequest player)
     {
-        return Ok(new[] {
-            new { Id = Guid.NewGuid(), Name = "Test Lobby", PlayerCount = 2 }
-        });
+        var playerQuery = _playerService.CreatePlayer(player);
+        return playerQuery != null ? Ok(playerQuery) : BadRequest(playerQuery);
     }
 }
