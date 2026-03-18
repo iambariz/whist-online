@@ -28,6 +28,9 @@ public class PlayerController : ControllerBase
     public IActionResult AddPlayer([FromBody] CreatePlayerRequest player)
     {
         var playerQuery = _playerService.CreatePlayer(player);
-        return playerQuery != null ? Ok(playerQuery) : BadRequest(playerQuery);
+        
+        return playerQuery != null ? 
+            CreatedAtAction(nameof(GetPlayer), new { id = playerQuery.Id }, playerQuery) : 
+            BadRequest();
     }
 }
