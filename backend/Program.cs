@@ -14,6 +14,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 builder.Services.AddScoped<PlayerService>();
 builder.Services.AddScoped<LobbyService>();
+builder.Services.AddScoped<TokenService>();
 
 var app = builder.Build();
 
