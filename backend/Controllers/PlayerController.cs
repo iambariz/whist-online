@@ -11,9 +11,11 @@ namespace WhistOnline.API.Controllers;
 public class PlayerController : ControllerBase
 {
     private readonly PlayerService _playerService;
-    public PlayerController(PlayerService playerService)                                                                                           
+    private readonly TokenService _tokenService;
+    public PlayerController(PlayerService playerService, TokenService tokenService)                                                                                           
     {               
         _playerService = playerService;
+        _tokenService = tokenService;
     }              
     
     [HttpGet("{id}")]                                                                                                                  
@@ -29,8 +31,10 @@ public class PlayerController : ControllerBase
     {
         var playerQuery = _playerService.CreatePlayer(player);
         
-        return playerQuery != null ? 
-            CreatedAtAction(nameof(GetPlayer), new { id = playerQuery.Id }, playerQuery) : 
-            BadRequest();
+        if(playerQuery == null) return BadRequest();
+        
+        var token = _tokenService.GenerateToken(playerQuery);                         
+        return CreatedAtAction(nameof(GetPlayer), new { id = playerQuery.Id }, new {  
+            player = playerQuery, token });   
     }
 }

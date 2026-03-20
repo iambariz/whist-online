@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WhistOnline.API.DTOs;
 using WhistOnline.API.Services;
@@ -10,7 +11,6 @@ public class LobbyController : ControllerBase
 {
     private readonly LobbyService _lobbyService;
     private readonly PlayerService _playerService;
-    
     public LobbyController(LobbyService lobbyService, PlayerService playerService)
     {
         _lobbyService = lobbyService;
@@ -46,6 +46,7 @@ public class LobbyController : ControllerBase
         return NoContent();                                                                                                                
     }
     
+    [Authorize]
     [HttpPost("{id:guid}/join")]
     public IActionResult JoinLobby(Guid id)
     {
