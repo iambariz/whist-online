@@ -17,6 +17,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<PlayerService>();
 builder.Services.AddScoped<LobbyService>();
 builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<GameService>();
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
     {
