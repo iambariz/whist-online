@@ -44,9 +44,8 @@ public class LobbyService
         return true;
     }
     
-    public bool JoinLobby(Guid id)
+    public bool JoinLobby(Guid id, Guid playerId)
     {
-        var playerId = 123;
         var player = _db.Players.Find(playerId);                                                                                           
         if (player == null) return false;
 

@@ -42,17 +42,20 @@ public class LobbyController : ControllerBase
     [HttpDelete("{id:guid}")]
     public IActionResult DeleteLobby(Guid id)
     {
+        //Todo: Validation here
         if (!_lobbyService.DeleteGame(id)) return NotFound();
         return NoContent();                                                                                                                
     }
     
     [Authorize]
     [HttpPost("{id:guid}/join")]
-    public IActionResult JoinLobby(Guid id)
+    public IActionResult JoinLobby(Guid lobbyId)
     {
-        //Add JWT service in next commit
+        var player = _playerService.GetPlayerFromToken(User);
         
-        if (!_lobbyService.JoinLobby(id)) return NotFound();
+        if(player == null) return BadRequest();
+        
+        if (!_lobbyService.JoinLobby(lobbyId, player.Id)) return NotFound();
 
         return Ok();
     }

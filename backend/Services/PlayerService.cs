@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using WhistOnline.API.Data;
 using WhistOnline.API.DTOs;
 using WhistOnline.API.Models;
@@ -25,4 +26,12 @@ public class PlayerService
         _db.SaveChanges();
         return newPlayer;
     }
+    
+    public Player? GetPlayerFromToken(ClaimsPrincipal user)                                                                            
+    {                                                                                                                                  
+        var id = user.FindFirstValue(ClaimTypes.NameIdentifier);                                                                       
+        if (id == null) return null;                                                                                                   
+                                                                                                                                     
+        return FindPlayerByGuid(Guid.Parse(id));
+    }  
 }
