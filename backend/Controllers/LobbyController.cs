@@ -49,13 +49,13 @@ public class LobbyController : ControllerBase
     
     [Authorize]
     [HttpPost("{id:guid}/join")]
-    public IActionResult JoinLobby(Guid lobbyId)
+    public IActionResult JoinLobby(Guid id)
     {
         var player = _playerService.GetPlayerFromToken(User);
         
         if(player == null) return BadRequest();
         
-        if (!_lobbyService.JoinLobby(lobbyId, player.Id)) return NotFound();
+        if (!_lobbyService.JoinLobby(id, player.Id)) return NotFound();
 
         return Ok();
     }
