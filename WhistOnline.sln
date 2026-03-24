@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WhistOnline.API", "backend\WhistOnline.API.csproj", "{FD236CF6-9F6F-4C38-99ED-B93C625FC377}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WhistOnline.Tests", "WhistOnline.Tests\WhistOnline.Tests.csproj", "{4DFD1872-4CFB-4AA1-9307-AC19997EE950}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FD236CF6-9F6F-4C38-99ED-B93C625FC377}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD236CF6-9F6F-4C38-99ED-B93C625FC377}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD236CF6-9F6F-4C38-99ED-B93C625FC377}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD236CF6-9F6F-4C38-99ED-B93C625FC377}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DFD1872-4CFB-4AA1-9307-AC19997EE950}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DFD1872-4CFB-4AA1-9307-AC19997EE950}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DFD1872-4CFB-4AA1-9307-AC19997EE950}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DFD1872-4CFB-4AA1-9307-AC19997EE950}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
