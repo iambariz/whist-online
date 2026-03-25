@@ -30,13 +30,27 @@ public class GameServiceTests
         return game;
     }
 
+    // StartGame tests
+
     [Fact]
     public void StartGame_ReturnsNull_WhenGameNotFound()
     {
         var db = CreateDb();
         var service = CreateService(db);
 
-        var result = service.StartGame(Guid.NewGuid());
+        var result = service.StartGame(Guid.NewGuid(), Guid.NewGuid());
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void StartGame_ReturnsNull_WhenPlayerNotInGame()
+    {
+        var db = CreateDb();
+        var game = CreateGameWithPlayers(db, 4);
+        var service = CreateService(db);
+
+        var result = service.StartGame(game.Id, Guid.NewGuid());
 
         Assert.Null(result);
     }
@@ -48,7 +62,7 @@ public class GameServiceTests
         var game = CreateGameWithPlayers(db, 2);
         var service = CreateService(db);
 
-        var result = service.StartGame(game.Id);
+        var result = service.StartGame(game.Id, game.Players[0].Id);
 
         Assert.Null(result);
     }
@@ -60,7 +74,7 @@ public class GameServiceTests
         var game = CreateGameWithPlayers(db, 8);
         var service = CreateService(db);
 
-        var result = service.StartGame(game.Id);
+        var result = service.StartGame(game.Id, game.Players[0].Id);
 
         Assert.Null(result);
     }
@@ -72,7 +86,7 @@ public class GameServiceTests
         var game = CreateGameWithPlayers(db, 4);
         var service = CreateService(db);
 
-        var result = service.StartGame(game.Id);
+        var result = service.StartGame(game.Id, game.Players[0].Id);
 
         Assert.NotNull(result);
         Assert.Equal(GameStatus.Bidding, result.Status);
@@ -85,7 +99,7 @@ public class GameServiceTests
         var game = CreateGameWithPlayers(db, 4);
         var service = CreateService(db);
 
-        var result = service.StartGame(game.Id);
+        var result = service.StartGame(game.Id, game.Players[0].Id);
 
         Assert.NotNull(result);
         Assert.All(result.Players, p => Assert.Equal(13, p.Hand.Count)); // 52 / 4 = 13
@@ -98,9 +112,80 @@ public class GameServiceTests
         var game = CreateGameWithPlayers(db, 3);
         var service = CreateService(db);
 
-        var result = service.StartGame(game.Id);
+        var result = service.StartGame(game.Id, game.Players[0].Id);
 
         Assert.NotNull(result);
         Assert.All(result.Players, p => Assert.Equal(16, p.Hand.Count)); // 48 / 3 = 16
+    }
+
+    // GetGameState tests
+
+    [Fact]
+    public void GetGameState_ReturnsNull_WhenGameNotFound()
+    {
+        var db = CreateDb();
+        var service = CreateService(db);
+
+        var result = service.GetGameState(Guid.NewGuid(), Guid.NewGuid());
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void GetGameState_ReturnsNull_WhenPlayerNotInGame()
+    {
+        var db = CreateDb();
+        var game = CreateGameWithPlayers(db, 4);
+        var service = CreateService(db);
+
+        var result = service.GetGameState(game.Id, Guid.NewGuid());
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void GetGameState_ReturnsState_WhenValid()
+    {
+        var db = CreateDb();
+        var game = CreateGameWithPlayers(db, 4);
+        var service = CreateService(db);
+        var playerId = game.Players[0].Id;
+
+        var result = service.GetGameState(game.Id, playerId);
+
+        Assert.NotNull(result);
+        Assert.Equal(game.Id, result.GameId);
+        Assert.Equal(4, result.Players!.Count);
+    }
+
+    [Fact]
+    public void GetGameState_OnlyReturnsMyHand_ForRequestingPlayer()
+    {
+        var db = CreateDb();
+        var game = CreateGameWithPlayers(db, 4);
+        var service = CreateService(db);
+        var playerId = game.Players[0].Id;
+
+        service.StartGame(game.Id, playerId);
+        var result = service.GetGameState(game.Id, playerId);
+
+        Assert.NotNull(result);
+        Assert.NotNull(result.MyHand);
+        Assert.Equal(13, result.MyHand!.Count);
+    }
+
+    [Fact]
+    public void GetGameState_HidesOtherPlayersHands()
+    {
+        var db = CreateDb();
+        var game = CreateGameWithPlayers(db, 4);
+        var service = CreateService(db);
+        var playerId = game.Players[0].Id;
+
+        service.StartGame(game.Id, playerId);
+        var result = service.GetGameState(game.Id, playerId);
+
+        Assert.NotNull(result);
+        Assert.All(result.Players!, p => Assert.Equal(13, p.CardCount));
     }
 }
