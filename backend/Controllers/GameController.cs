@@ -29,4 +29,18 @@ public class GameController : ControllerBase
         return Ok(game);
                                                                                                                                                         
     }
+    
+    [Authorize]
+    [HttpGet("{id:guid}")]
+    public IActionResult GetGameState(Guid id)
+    {
+        var player = _playerService.GetPlayerFromToken(User);
+        if (player == null) return BadRequest();
+        
+        var gameState = _gameService.GetGameState(id, player.Id);
+        
+        if (gameState == null) return NotFound();
+        return Ok(gameState);
+    }
+    
 }

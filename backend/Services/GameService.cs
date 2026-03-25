@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using WhistOnline.API.Data;
+using WhistOnline.API.DTOs;
 using WhistOnline.API.Models;
 
 namespace WhistOnline.API.Services;
@@ -29,12 +30,44 @@ public class GameService
         _db.SaveChanges();                                                                                                                                                                    
         return game;
     }
+
+    public GameStateDto? GetGameState(Guid gameId, Guid playerId)
+    {
+        var game = _db.Games.Include(g => g.Players).FirstOrDefault(g => g.Id == gameId);
+        if (game == null) return null;
+        if (!IsPlayerInGame(game, playerId)) return null;
+
+        return new GameStateDto
+        {
+            GameId = game.Id,
+            Status = game.Status.ToString(),
+            CurrentRound = game.CurrentRound,
+            TotalRounds = game.TotalRounds,
+            TrumpSuit = game.TrumpSuit?.ToString(),
+            CurrentPlayerIndex = game.CurrentPlayerIndex,
+            DealerIndex = game.DealerIndex,
+            Players = game.Players.Select(p => new PlayerSummaryDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                SeatIndex = p.SeatIndex,
+                CardCount = p.Hand.Count,
+                Score = p.Score
+            }).ToList(),
+            MyHand = game.Players.FirstOrDefault(p => p.Id == playerId)?.Hand
+        };
+    }
     
     private bool ValidateGameStart(Game game, Guid playerId)
     {
         return game.Players.Any(p => p.Id == playerId) &&
                game.Players.Count >= MinPlayers &&
                game.Players.Count <= MaxPlayers;
+    }
+
+    private bool IsPlayerInGame(Game game, Guid playerId)
+    {
+        return game.Players.Any(p => p.Id == playerId);
     }
     
     private List<List<Card>> PrepareHands(List<Player> players)                                                                                                                           
