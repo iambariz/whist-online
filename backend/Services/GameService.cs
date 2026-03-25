@@ -17,18 +17,24 @@ public class GameService
         _db = db;                                                                                                                                                                     
         _deckService = deckService;    
     }
-    public Game? StartGame(Guid gameId)
+    public Game? StartGame(Guid gameId, Guid playerId)
     {
-        var game = _db.Games.Include(g => g.Players).FirstOrDefault(g => g.Id == gameId);                                                                                                     
-        
+        var game = _db.Games.Include(g => g.Players).FirstOrDefault(g => g.Id == gameId);
         if (game == null) return null;
-        if (game.Players.Count < MinPlayers || game.Players.Count > MaxPlayers) return null;
+        if (!ValidateGameStart(game, playerId)) return null;
 
         DistributeHandsToPlayers(PrepareHands(game.Players), game.Players);
         
         game.Status = GameStatus.Bidding;
         _db.SaveChanges();                                                                                                                                                                    
         return game;
+    }
+    
+    private bool ValidateGameStart(Game game, Guid playerId)
+    {
+        return game.Players.Any(p => p.Id == playerId) &&
+               game.Players.Count >= MinPlayers &&
+               game.Players.Count <= MaxPlayers;
     }
     
     private List<List<Card>> PrepareHands(List<Player> players)                                                                                                                           
