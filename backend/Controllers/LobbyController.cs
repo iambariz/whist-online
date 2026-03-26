@@ -25,10 +25,11 @@ public class LobbyController : ControllerBase
         return Ok(lobbies);
     }
     
+    [Authorize]
     [HttpPost]
-    public IActionResult Create([FromBody] CreateLobbyDto dto)
+    public IActionResult Create()
     {
-        var player = _playerService.FindPlayerByGuid(dto.Id);
+        var player = _playerService.GetPlayerFromToken(User);
 
         if (player == null)
         {
