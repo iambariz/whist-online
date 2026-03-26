@@ -3,6 +3,7 @@ namespace WhistOnline.Tests.Services;
 using Microsoft.EntityFrameworkCore;
 using WhistOnline.API.Data;
 using WhistOnline.API.Models;
+using WhistOnline.API.Repositories;
 using WhistOnline.API.Services;
 
 public class LobbyServiceTests
@@ -14,6 +15,9 @@ public class LobbyServiceTests
             .Options;
         return new AppDbContext(options);
     }
+
+    private LobbyService CreateService(AppDbContext db) =>
+        new LobbyService(new GameRepository(db), new PlayerRepository(db));
 
     // FindOpenLobbies tests
 
@@ -28,7 +32,7 @@ public class LobbyServiceTests
         );
         db.SaveChanges();
 
-        var result = new LobbyService(db).FindOpenLobbies();
+        var result = CreateService(db).FindOpenLobbies();
 
         Assert.Equal(2, result.Count);
         Assert.All(result, g => Assert.Equal(GameStatus.Waiting, g.Status));
@@ -41,7 +45,7 @@ public class LobbyServiceTests
         db.Games.Add(new Game { Status = GameStatus.Bidding });
         db.SaveChanges();
 
-        var result = new LobbyService(db).FindOpenLobbies();
+        var result = CreateService(db).FindOpenLobbies();
 
         Assert.Empty(result);
     }
@@ -56,7 +60,7 @@ public class LobbyServiceTests
         db.Players.Add(player);
         db.SaveChanges();
 
-        var result = new LobbyService(db).CreateGameForPlayer(player);
+        var result = CreateService(db).CreateGameForPlayer(player);
 
         Assert.NotNull(result);
         Assert.Single(result.Players);
@@ -71,7 +75,7 @@ public class LobbyServiceTests
         db.Players.Add(player);
         db.SaveChanges();
 
-        var result = new LobbyService(db).CreateGameForPlayer(player);
+        var result = CreateService(db).CreateGameForPlayer(player);
 
         Assert.Equal(0, result.Players[0].SeatIndex);
     }
@@ -84,7 +88,7 @@ public class LobbyServiceTests
         db.Players.Add(player);
         db.SaveChanges();
 
-        var result = new LobbyService(db).CreateGameForPlayer(player);
+        var result = CreateService(db).CreateGameForPlayer(player);
 
         Assert.Equal(GameStatus.Waiting, result.Status);
     }
@@ -99,7 +103,7 @@ public class LobbyServiceTests
         db.Games.Add(game);
         db.SaveChanges();
 
-        var result = new LobbyService(db).DeleteGame(game.Id);
+        var result = CreateService(db).DeleteGame(game.Id);
 
         Assert.True(result);
     }
@@ -109,7 +113,7 @@ public class LobbyServiceTests
     {
         var db = CreateDb();
 
-        var result = new LobbyService(db).DeleteGame(Guid.NewGuid());
+        var result = CreateService(db).DeleteGame(Guid.NewGuid());
 
         Assert.False(result);
     }
@@ -122,7 +126,7 @@ public class LobbyServiceTests
         db.Games.Add(game);
         db.SaveChanges();
 
-        new LobbyService(db).DeleteGame(game.Id);
+        CreateService(db).DeleteGame(game.Id);
 
         Assert.Null(db.Games.Find(game.Id));
     }
@@ -139,7 +143,7 @@ public class LobbyServiceTests
         db.Games.Add(game);
         db.SaveChanges();
 
-        var result = new LobbyService(db).JoinLobby(game.Id, player.Id);
+        var result = CreateService(db).JoinLobby(game.Id, player.Id);
 
         Assert.True(result);
     }
@@ -152,7 +156,7 @@ public class LobbyServiceTests
         db.Games.Add(game);
         db.SaveChanges();
 
-        var result = new LobbyService(db).JoinLobby(game.Id, Guid.NewGuid());
+        var result = CreateService(db).JoinLobby(game.Id, Guid.NewGuid());
 
         Assert.False(result);
     }
@@ -165,7 +169,7 @@ public class LobbyServiceTests
         db.Players.Add(player);
         db.SaveChanges();
 
-        var result = new LobbyService(db).JoinLobby(Guid.NewGuid(), player.Id);
+        var result = CreateService(db).JoinLobby(Guid.NewGuid(), player.Id);
 
         Assert.False(result);
     }
@@ -179,7 +183,7 @@ public class LobbyServiceTests
         db.Games.Add(game);
         db.SaveChanges();
 
-        var result = new LobbyService(db).JoinLobby(game.Id, player.Id);
+        var result = CreateService(db).JoinLobby(game.Id, player.Id);
 
         Assert.False(result);
     }
@@ -194,7 +198,7 @@ public class LobbyServiceTests
         db.Games.Add(game);
         db.SaveChanges();
 
-        var result = new LobbyService(db).JoinLobby(game.Id, player.Id);
+        var result = CreateService(db).JoinLobby(game.Id, player.Id);
 
         Assert.False(result);
     }

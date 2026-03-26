@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using WhistOnline.API.Data;
 using WhistOnline.API.DTOs;
 using WhistOnline.API.Models;
+using WhistOnline.API.Repositories;
 using WhistOnline.API.Services;
 
 
@@ -18,6 +19,9 @@ public class PlayerServiceTests
         return new AppDbContext(options);
     }
 
+    private PlayerService CreateService(AppDbContext db) =>
+        new PlayerService(new PlayerRepository(db));
+
     // FindPlayerByGuid tests
 
     [Fact]
@@ -28,7 +32,7 @@ public class PlayerServiceTests
         db.Players.Add(player);
         db.SaveChanges();
 
-        var result = new PlayerService(db).FindPlayerByGuid(player.Id);
+        var result = CreateService(db).FindPlayerByGuid(player.Id);
 
         Assert.NotNull(result);
         Assert.Equal("Alice", result.Name);
@@ -39,7 +43,7 @@ public class PlayerServiceTests
     {
         var db = CreateDb();
 
-        var result = new PlayerService(db).FindPlayerByGuid(Guid.NewGuid());
+        var result = CreateService(db).FindPlayerByGuid(Guid.NewGuid());
 
         Assert.Null(result);
     }
@@ -52,7 +56,7 @@ public class PlayerServiceTests
         var db = CreateDb();
         var request = new CreatePlayerRequest { Name = "Bob" };
 
-        var result = new PlayerService(db).CreatePlayer(request);
+        var result = CreateService(db).CreatePlayer(request);
 
         Assert.NotNull(result);
         Assert.Equal("Bob", result.Name);
@@ -63,7 +67,7 @@ public class PlayerServiceTests
     {
         var db = CreateDb();
         var request = new CreatePlayerRequest { Name = "Bob" };
-        var service = new PlayerService(db);
+        var service = CreateService(db);
 
         var created = service.CreatePlayer(request);
         var found = service.FindPlayerByGuid(created!.Id);
@@ -86,7 +90,7 @@ public class PlayerServiceTests
             new Claim(ClaimTypes.NameIdentifier, player.Id.ToString())
         }));
 
-        var result = new PlayerService(db).GetPlayerFromToken(claims);
+        var result = CreateService(db).GetPlayerFromToken(claims);
 
         Assert.NotNull(result);
         Assert.Equal(player.Id, result.Id);
@@ -98,7 +102,7 @@ public class PlayerServiceTests
         var db = CreateDb();
         var claims = new ClaimsPrincipal(new ClaimsIdentity());
 
-        var result = new PlayerService(db).GetPlayerFromToken(claims);
+        var result = CreateService(db).GetPlayerFromToken(claims);
 
         Assert.Null(result);
     }

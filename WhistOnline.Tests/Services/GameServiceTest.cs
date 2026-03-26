@@ -3,6 +3,7 @@ namespace WhistOnline.Tests.Services;
 using Microsoft.EntityFrameworkCore;
 using WhistOnline.API.Data;
 using WhistOnline.API.Models;
+using WhistOnline.API.Repositories;
 using WhistOnline.API.Services;
 
 public class GameServiceTests
@@ -16,7 +17,7 @@ public class GameServiceTests
     }
 
     private GameService CreateService(AppDbContext db) =>
-        new GameService(db, new DeckService());
+        new GameService(new GameRepository(db), new DeckService());
 
     private Game CreateGameWithPlayers(AppDbContext db, int playerCount)
     {
