@@ -40,9 +40,9 @@ public class GameController : ControllerBase
         var player = _playerService.GetPlayerFromToken(User);
         if (player == null) return BadRequest();
         
-        var game = _gameService.StartGame(id, player.Id);
-        if (game == null) return NotFound();
-        return Ok(game);
+        if (_gameService.StartGame(id, player.Id) == null) return NotFound();
+        var gameState = _gameService.GetGameState(id, player.Id);
+        return Ok(gameState);
                                                                                                                                                         
     }
     
