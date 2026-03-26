@@ -1,5 +1,6 @@
 using WhistOnline.API.Data;
 using Microsoft.EntityFrameworkCore;
+using WhistOnline.API.Repositories;
 using WhistOnline.API.Services;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
@@ -14,6 +15,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+builder.Services.AddScoped<GameRepository>();
+builder.Services.AddScoped<PlayerRepository>();
+builder.Services.AddScoped<BidRepository>();
 builder.Services.AddScoped<PlayerService>();
 builder.Services.AddScoped<LobbyService>();
 builder.Services.AddScoped<TokenService>();

@@ -1,25 +1,23 @@
-using Microsoft.EntityFrameworkCore;
-using WhistOnline.API.Data;
 using WhistOnline.API.DTOs;
 using WhistOnline.API.Models;
+using WhistOnline.API.Repositories;
 
 namespace WhistOnline.API.Services;
 
 public class BidService
 {
-    private readonly AppDbContext _db;
+    private readonly GameRepository _gameRepository;
+    private readonly BidRepository _bidRepository;
 
-    public BidService(AppDbContext db)                                                                                                                      
+    public BidService(GameRepository gameRepository, BidRepository bidRepository)
     {
-        _db = db;                                                                                                                                                                     
+        _gameRepository = gameRepository;
+        _bidRepository = bidRepository;
     }
+
     public Bid? SubmitBid(Guid gameId, Guid playerId, int amount)
     {
-        var game = _db.Games
-            .Include(g => g.Players)
-            .Include(g => g.Rounds)
-                .ThenInclude(r => r.Bids)
-            .FirstOrDefault(g => g.Id == gameId);
+        var game = _gameRepository.FindByIdWithPlayersAndRoundsAndBids(gameId);
 
         if (game == null) return null;
         if (game.Status != GameStatus.Bidding) return null;
@@ -63,9 +61,9 @@ public class BidService
     private Bid CreateBid(Guid currentRoundId, Guid playerId, int amount, Game game)
     {
         var bid = new Bid { Amount = amount, PlayerId = playerId, RoundId = currentRoundId };
-        _db.Bids.Add(bid);
+        _bidRepository.Add(bid);
         game.CurrentPlayerIndex = (game.CurrentPlayerIndex + 1) % game.Players.Count;
-        _db.SaveChanges();
+        _gameRepository.SaveChanges();
         return bid;
     }
 }

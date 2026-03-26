@@ -1,7 +1,6 @@
-using Microsoft.EntityFrameworkCore;
-using WhistOnline.API.Data;
 using WhistOnline.API.DTOs;
 using WhistOnline.API.Models;
+using WhistOnline.API.Repositories;
 
 namespace WhistOnline.API.Services;
 
@@ -9,31 +8,32 @@ public class GameService
 {
     private const int MinPlayers = 3;
     private const int MaxPlayers = 7;
-    
-    private readonly AppDbContext _db;
+
+    private readonly GameRepository _gameRepository;
     private readonly DeckService _deckService;
 
-    public GameService(AppDbContext db, DeckService deckService)                                                                                                                      
+    public GameService(GameRepository gameRepository, DeckService deckService)
     {
-        _db = db;                                                                                                                                                                     
-        _deckService = deckService;    
+        _gameRepository = gameRepository;
+        _deckService = deckService;
     }
+
     public Game? StartGame(Guid gameId, Guid playerId)
     {
-        var game = _db.Games.Include(g => g.Players).FirstOrDefault(g => g.Id == gameId);
+        var game = _gameRepository.FindByIdWithPlayers(gameId);
         if (game == null) return null;
         if (!ValidateGameStart(game, playerId)) return null;
 
         DistributeHandsToPlayers(PrepareHands(game.Players), game.Players);
-        
+
         game.Status = GameStatus.Bidding;
-        _db.SaveChanges();                                                                                                                                                                    
+        _gameRepository.SaveChanges();
         return game;
     }
 
     public GameStateDto? GetGameState(Guid gameId, Guid playerId)
     {
-        var game = _db.Games.Include(g => g.Players).FirstOrDefault(g => g.Id == gameId);
+        var game = _gameRepository.FindByIdWithPlayers(gameId);
         if (game == null) return null;
         if (!IsPlayerInGame(game, playerId)) return null;
 
@@ -57,7 +57,7 @@ public class GameService
             MyHand = game.Players.FirstOrDefault(p => p.Id == playerId)?.Hand
         };
     }
-    
+
     private bool ValidateGameStart(Game game, Guid playerId)
     {
         return game.Players.Any(p => p.Id == playerId) &&
@@ -69,14 +69,14 @@ public class GameService
     {
         return game.Players.Any(p => p.Id == playerId);
     }
-    
-    private List<List<Card>> PrepareHands(List<Player> players)                                                                                                                           
-    {                                                         
-        var deck = _deckService.TrimDeck(_deckService.BuildDeck(), players.Count);                                                                                                        
+
+    private List<List<Card>> PrepareHands(List<Player> players)
+    {
+        var deck = _deckService.TrimDeck(_deckService.BuildDeck(), players.Count);
         var shuffled = _deckService.Shuffle(deck);
-        return _deckService.Deal(shuffled, players.Count, shuffled.Count / players.Count);                                                                                                
-    }     
-    
+        return _deckService.Deal(shuffled, players.Count, shuffled.Count / players.Count);
+    }
+
     private void DistributeHandsToPlayers(List<List<Card>> hands, List<Player> players)
     {
         var playerBySeat = players.ToDictionary(p => p.SeatIndex);
@@ -84,5 +84,5 @@ public class GameService
         {
             playerBySeat[i].Hand = hands[i];
         }
-    }     
+    }
 }

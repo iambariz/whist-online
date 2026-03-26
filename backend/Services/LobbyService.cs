@@ -1,63 +1,62 @@
-using Microsoft.EntityFrameworkCore;
-using WhistOnline.API.Data;
 using WhistOnline.API.Models;
+using WhistOnline.API.Repositories;
 
 namespace WhistOnline.API.Services;
 
 public class LobbyService
 {
-    private readonly AppDbContext _db;
-    public LobbyService(AppDbContext db)                                                                                           
-    {               
-        _db = db;
-    }              
-    
-    
-    public Game? FindLobbyById(Guid id)
+    private readonly GameRepository _gameRepository;
+    private readonly PlayerRepository _playerRepository;
+
+    public LobbyService(GameRepository gameRepository, PlayerRepository playerRepository)
     {
-        return _db.Games.FirstOrDefault(p => p.Id == id);
+        _gameRepository = gameRepository;
+        _playerRepository = playerRepository;
     }
 
-    public List<Game> FindOpenLobbies()                                                                                                
+    public Game? FindLobbyById(Guid id)
     {
-        return _db.Games.Where(g => g.Status == GameStatus.Waiting).ToList();                                                          
+        return _gameRepository.FindById(id);
+    }
+
+    public List<Game> FindOpenLobbies()
+    {
+        return _gameRepository.FindOpenLobbies();
     }
 
     //Todo: Rate limiting
     public Game CreateGameForPlayer(Player player)
     {
         player.SeatIndex = 0;
-        var newGame = new Game { Players = new List<Player> { player } };                                                              
-        _db.Games.Add(newGame);
-        _db.SaveChanges();                                                                                                             
+        var newGame = new Game { Players = new List<Player> { player } };
+        _gameRepository.Add(newGame);
+        _gameRepository.SaveChanges();
         return newGame;
     }
 
     //Todo: JWT + User check
     public bool DeleteGame(Guid id)
     {
-        var game = _db.Games.FirstOrDefault(p => p.Id == id);
+        var game = _gameRepository.FindById(id);
         if (game == null) return false;
-        
-        _db.Games.Remove(game);
-        _db.SaveChanges();
+
+        _gameRepository.Remove(game);
+        _gameRepository.SaveChanges();
         return true;
     }
-    
+
     public bool JoinLobby(Guid id, Guid playerId)
     {
-        var player = _db.Players.Find(playerId);                                                                                           
+        var player = _playerRepository.FindByIdTracked(playerId);
         if (player == null) return false;
 
-        var lobby = _db.Games                                                                                                              
-            .Include(g => g.Players)                                                                                                       
-            .FirstOrDefault(g => g.Id == id && g.Status == GameStatus.Waiting);                                                            
+        var lobby = _gameRepository.FindOpenLobbyByIdWithPlayers(id);
 
         if (lobby == null || lobby.Players.Any(p => p.Id == player.Id)) return false;
-        
-        lobby.Players.Add(player);             
-        
-        _db.SaveChanges();
+
+        lobby.Players.Add(player);
+
+        _gameRepository.SaveChanges();
         return true;
     }
 }
