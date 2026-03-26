@@ -7,16 +7,15 @@ namespace WhistOnline.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class GameController : ControllerBase
+public class GameController : BaseController
 {
     private readonly GameService _gameService;
-    private readonly PlayerService _playerService;
     private readonly BidService _bidService;
 
     public GameController(GameService gameService, PlayerService playerService, BidService bidService)
+        : base(playerService)
     {
         _gameService = gameService;
-        _playerService = playerService;
         _bidService = bidService;
     }
     
@@ -24,9 +23,9 @@ public class GameController : ControllerBase
     [HttpGet("{id:guid}")]
     public IActionResult GetGameState(Guid id)
     {
-        var player = _playerService.GetPlayerFromToken(User);
+        var player = GetCurrentPlayer();
         if (player == null) return BadRequest();
-        
+
         var gameState = _gameService.GetGameState(id, player.Id);
         
         if (gameState == null) return NotFound();
@@ -37,9 +36,9 @@ public class GameController : ControllerBase
     [HttpPost("{id:guid}/start")]
     public IActionResult StartGame(Guid id)
     {
-        var player = _playerService.GetPlayerFromToken(User);
+        var player = GetCurrentPlayer();
         if (player == null) return BadRequest();
-        
+
         if (_gameService.StartGame(id, player.Id) == null) return NotFound();
         var gameState = _gameService.GetGameState(id, player.Id);
         return Ok(gameState);
@@ -50,7 +49,7 @@ public class GameController : ControllerBase
     [HttpPost("{id:guid}/bid")]
     public IActionResult SubmitBid(Guid id,[FromBody] SubmitBidDto submitBidDto)
     {
-        var player = _playerService.GetPlayerFromToken(User);
+        var player = GetCurrentPlayer();
         if (player == null) return BadRequest();
 
         var bid = _bidService.SubmitBid(id, player.Id, submitBidDto.Amount);

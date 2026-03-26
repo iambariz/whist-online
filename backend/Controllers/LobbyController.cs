@@ -1,20 +1,19 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WhistOnline.API.DTOs;
 using WhistOnline.API.Services;
 
 namespace WhistOnline.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class LobbyController : ControllerBase
+public class LobbyController : BaseController
 {
     private readonly LobbyService _lobbyService;
-    private readonly PlayerService _playerService;
+
     public LobbyController(LobbyService lobbyService, PlayerService playerService)
+        : base(playerService)
     {
         _lobbyService = lobbyService;
-        _playerService = playerService;
     }
     
     [HttpGet]
@@ -29,12 +28,8 @@ public class LobbyController : ControllerBase
     [HttpPost]
     public IActionResult Create()
     {
-        var player = _playerService.GetPlayerFromToken(User);
-
-        if (player == null)
-        {
-            return BadRequest();
-        }
+        var player = GetCurrentPlayer();
+        if (player == null) return BadRequest();
 
         var createdLobby = _lobbyService.CreateGameForPlayer(player);
         return Ok(createdLobby);
@@ -52,9 +47,8 @@ public class LobbyController : ControllerBase
     [HttpPost("{id:guid}/join")]
     public IActionResult JoinLobby(Guid id)
     {
-        var player = _playerService.GetPlayerFromToken(User);
-        
-        if(player == null) return BadRequest();
+        var player = GetCurrentPlayer();
+        if (player == null) return BadRequest();
         
         if (!_lobbyService.JoinLobby(id, player.Id)) return NotFound();
 
