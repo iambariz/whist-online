@@ -18,6 +18,7 @@ builder.Services.AddScoped<PlayerService>();
 builder.Services.AddScoped<LobbyService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<GameService>();
+builder.Services.AddScoped<BidService>();
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
     {

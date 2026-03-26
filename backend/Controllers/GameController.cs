@@ -11,23 +11,13 @@ public class GameController : ControllerBase
 {
     private readonly GameService _gameService;
     private readonly PlayerService _playerService;
-    public GameController(GameService gameService,  PlayerService playerService)
+    private readonly BidService _bidService;
+
+    public GameController(GameService gameService, PlayerService playerService, BidService bidService)
     {
         _gameService = gameService;
         _playerService = playerService;
-    }
-
-    [Authorize]
-    [HttpPost("{id:guid}/start")]
-    public IActionResult StartGame(Guid id)
-    {
-        var player = _playerService.GetPlayerFromToken(User);
-        if (player == null) return BadRequest();
-        
-        var game = _gameService.StartGame(id, player.Id);
-        if (game == null) return NotFound();
-        return Ok(game);
-                                                                                                                                                        
+        _bidService = bidService;
     }
     
     [Authorize]
@@ -43,4 +33,43 @@ public class GameController : ControllerBase
         return Ok(gameState);
     }
     
+    [Authorize]
+    [HttpPost("{id:guid}/start")]
+    public IActionResult StartGame(Guid id)
+    {
+        var player = _playerService.GetPlayerFromToken(User);
+        if (player == null) return BadRequest();
+        
+        var game = _gameService.StartGame(id, player.Id);
+        if (game == null) return NotFound();
+        return Ok(game);
+                                                                                                                                                        
+    }
+    
+    [Authorize]
+    [HttpPost("{id:guid}/bid")]
+    public IActionResult SubmitBid(Guid id,[FromBody] SubmitBidDto submitBidDto)
+    {
+        var player = _playerService.GetPlayerFromToken(User);
+        if (player == null) return BadRequest();
+
+        var bid = _bidService.SubmitBid(id, player.Id, submitBidDto.Amount);
+        if (bid == null) return BadRequest();
+
+        return Ok(bid);
+    }
+    
+    [Authorize]
+    [HttpPost("{id:guid}/play")]
+    public IActionResult PlayCard(Guid id)
+    {
+        return Ok();
+    }
+    
+    [Authorize]
+    [HttpGet("{id:guid}/scores")]
+    public IActionResult GetScoreBoard(Guid id)
+    {
+        return Ok();
+    }
 }
