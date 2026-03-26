@@ -77,12 +77,12 @@ public class GameService
         return _deckService.Deal(shuffled, players.Count, shuffled.Count / players.Count);                                                                                                
     }     
     
-    private void DistributeHandsToPlayers(List<List<Card>> hands, List<Player> players)                                                                                                   
-    {                                      
-        for (int i = 0; i < players.Count; i++)                                                                                                                                           
+    private void DistributeHandsToPlayers(List<List<Card>> hands, List<Player> players)
+    {
+        var playerBySeat = players.ToDictionary(p => p.SeatIndex);
+        for (int i = 0; i < players.Count; i++)
         {
-            var player = players.First(p => p.SeatIndex == i);                                                                                                                            
-            player.Hand = hands[i];                                                                                                                                                       
+            playerBySeat[i].Hand = hands[i];
         }
     }     
 }
