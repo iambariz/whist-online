@@ -11,12 +11,14 @@ public class GameController : BaseController
 {
     private readonly GameService _gameService;
     private readonly BidService _bidService;
+    private readonly TrickService _trickService;
 
-    public GameController(GameService gameService, PlayerService playerService, BidService bidService)
+    public GameController(GameService gameService, PlayerService playerService, BidService bidService,  TrickService trickService)
         : base(playerService)
     {
         _gameService = gameService;
         _bidService = bidService;
+        _trickService = trickService;
     }
     
     [Authorize]
@@ -42,7 +44,6 @@ public class GameController : BaseController
         if (_gameService.StartGame(id, player.Id) == null) return NotFound();
         var gameState = _gameService.GetGameState(id, player.Id);
         return Ok(gameState);
-                                                                                                                                                        
     }
     
     [Authorize]
@@ -60,9 +61,16 @@ public class GameController : BaseController
     
     [Authorize]
     [HttpPost("{id:guid}/play")]
-    public IActionResult PlayCard(Guid id)
+    public IActionResult PlayCard(Guid id, [FromBody] PlayCardDto cardDto)
     {
-        return Ok();
+        var player = GetCurrentPlayer();
+        if (player == null) return BadRequest();
+
+        var trickPlayed = _trickService.PlayCard(PlayCardDto, id, player.Id);
+        if (trickPlayed == false) return BadRequest();
+        
+        var gameState = _gameService.GetGameState(id, player.Id);
+        return Ok(gameState);
     }
     
     [Authorize]

@@ -23,6 +23,7 @@ builder.Services.AddScoped<LobbyService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<GameService>();
 builder.Services.AddScoped<BidService>();
+builder.Services.AddScoped<TrickService>();
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
     {

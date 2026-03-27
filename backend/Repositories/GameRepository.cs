@@ -23,6 +23,16 @@ public class GameRepository
         return _db.Games.Include(g => g.Players).FirstOrDefault(g => g.Id == id);
     }
 
+    public Game? FindByIdWithRoundsAndTricks(Guid id)
+    {
+        return _db.Games                                                                                                                                                                                                                                                                                                
+            .Include(g => g.Players)                                                                                                                                                                                                                                                                                    
+            .Include(g => g.Rounds)                                                                                                                                                                                                                                                                                     
+            .ThenInclude(r => r.Tricks)
+            .ThenInclude(t => t.CardsPlayed)                                                                                                                                                                                                                                                                    
+            .FirstOrDefault(g => g.Id == id);
+    }
+
     public Game? FindByIdWithPlayersAndRoundsAndBids(Guid id)
     {
         return _db.Games
