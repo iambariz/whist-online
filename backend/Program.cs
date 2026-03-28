@@ -1,5 +1,6 @@
 using WhistOnline.API.Data;
 using Microsoft.EntityFrameworkCore;
+using WhistOnline.API.Actions;
 using WhistOnline.API.Repositories;
 using WhistOnline.API.Services;
 using System.Text;
@@ -22,8 +23,8 @@ builder.Services.AddScoped<PlayerService>();
 builder.Services.AddScoped<LobbyService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<GameService>();
-builder.Services.AddScoped<BidService>();
 builder.Services.AddScoped<TrickService>();
+builder.Services.AddScoped<GameRules>();
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
     {

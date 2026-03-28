@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WhistOnline.API.Actions;
 using WhistOnline.API.DTOs;
+using WhistOnline.API.Repositories;
 using WhistOnline.API.Services;
 
 namespace WhistOnline.API.Controllers;
@@ -10,15 +12,25 @@ namespace WhistOnline.API.Controllers;
 public class GameController : BaseController
 {
     private readonly GameService _gameService;
-    private readonly BidService _bidService;
     private readonly TrickService _trickService;
+    private readonly GameRepository _gameRepository;
+    private readonly BidRepository _bidRepository;
+    private readonly GameRules _gameRules;
 
-    public GameController(GameService gameService, PlayerService playerService, BidService bidService,  TrickService trickService)
+    public GameController(
+        GameService gameService,
+        PlayerService playerService,
+        TrickService trickService,
+        GameRepository gameRepository,
+        BidRepository bidRepository,
+        GameRules gameRules)
         : base(playerService)
     {
         _gameService = gameService;
-        _bidService = bidService;
         _trickService = trickService;
+        _gameRepository = gameRepository;
+        _bidRepository = bidRepository;
+        _gameRules = gameRules;
     }
     
     [Authorize]
@@ -53,10 +65,14 @@ public class GameController : BaseController
         var player = GetCurrentPlayer();
         if (player == null) return BadRequest();
 
-        var bid = _bidService.SubmitBid(id, player.Id, submitBidDto.Amount);
-        if (bid == null) return BadRequest();
+        var game = _gameRepository.FindByIdWithPlayersAndRoundsAndBids(id);
+        if (game == null) return NotFound();
 
-        return Ok(bid);
+        var action = new BidAction(_gameRules, _bidRepository, submitBidDto.Amount);
+        if (!action.Execute(game, player)) return BadRequest();
+
+        _gameRepository.SaveChanges();
+        return Ok(action.Result);
     }
     
     [Authorize]

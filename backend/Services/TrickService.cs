@@ -20,8 +20,9 @@ public class TrickService
         if(game is not { Status: GameStatus.Playing }) return false;
         if (!PlayerIsInTurn(game, player)) return false;
         if (!IsCardPlayedValid(playCardDto, game, player)) return false;
-        
-        
+
+
+        return false;
         // 1. Find the card in the player's hand                                                                                                                                                                                                                                                                               
         // 2. Add it to the current trick's CardsPlayed                                                                                                                                                                                                                                                                        
         // 3. Set the trick's LeadSuit if it's the first card                                                                                                                                                                                                                                                                  
