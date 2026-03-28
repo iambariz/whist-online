@@ -66,7 +66,7 @@ public class GameController : BaseController
         var player = GetCurrentPlayer();
         if (player == null) return BadRequest();
 
-        var trickPlayed = _trickService.PlayCard(PlayCardDto, id, player.Id);
+        var trickPlayed = _trickService.PlayCard(cardDto, id, player);
         if (trickPlayed == false) return BadRequest();
         
         var gameState = _gameService.GetGameState(id, player.Id);
