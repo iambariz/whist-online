@@ -6,6 +6,7 @@ namespace WhistOnline.API.Actions;
 public class PlayCardAction : RoundAction
 {
     private readonly PlayCardDto _playCardDto;
+    private readonly User
 
     public PlayCardAction(GameRules gameRules, PlayCardDto playCardDto)
         : base(gameRules)
@@ -27,15 +28,45 @@ public class PlayCardAction : RoundAction
 
     protected override void ExecuteInternal(Game game, Player player)
     {
-        // TODO: 1. Find the card in the player's hand
-        // TODO: 2. Add CardPlay to current trick's CardsPlayed
-        // TODO: 3. Set trick's LeadSuit if first card
-        // TODO: 4. Remove card from player's hand
+        var card = player.Hand.First(c => c.Suit == _playCardDto.Suit && c.Rank == _playCardDto.Rank);                
+        var currentTrick = game.Rounds.Last().Tricks.Last();                                                                               
+        currentTrick.CardsPlayed.Add(new CardPlay { PlayerId = player.Id, Card = card, TrickId = currentTrick.Id });
+        if (currentTrick.LeadSuit == null) currentTrick.LeadSuit = card.Suit;  
+        player.Hand.Remove(card);
     }
 
-    protected override void AfterAction(Game game)
+    protected override void AfterAction(Game game)                                                                                     
+    {                                                                                                                                
+        var currentTrick = game.Rounds.Last().Tricks.Last();
+        if (currentTrick.CardsPlayed.Count == game.Players.Count)
+        {                                                                                                                              
+            EvaluateTrick(game, currentTrick);
+            EvaluateRound(game, currentTrick);
+            // TODO: EvaluateRound if no cards left                                                                                    
+        }                                                                                                                              
+    }
+
+    
+    private void EvaluateTrick(Game game, Trick currentTrick)                                                                          
     {
-        // TODO: Call EvaluateTrick if all players have played
+        var playedCards = currentTrick.CardsPlayed;                                                                                    
+        var winner = playedCards                                                                                                       
+                         .Where(cp => cp.Card.Suit == game.TrumpSuit)
+                         .MaxBy(cp => cp.Card.Rank)                                                                                                 
+                     ?? playedCards                                                                                                           
+                         .Where(cp => cp.Card.Suit == currentTrick.LeadSuit)
+                         .MaxBy(cp => cp.Card.Rank);                                                                                            
+   
+        if (winner == null) return;                                                                                                    
+                                                                                                                                   
+        currentTrick.WinnerPlayerId = winner.PlayerId;                                                                                 
+        var winnerPlayer = game.Players.First(p => p.Id == winner.PlayerId);
+        game.CurrentPlayerIndex = winnerPlayer.SeatIndex;                                                                              
+    }
+
+    private void EvaluateRound(Game game)
+    {
+        
     }
 
     private bool PlayerHasCard(Player player)
