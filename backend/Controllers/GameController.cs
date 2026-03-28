@@ -12,7 +12,6 @@ namespace WhistOnline.API.Controllers;
 public class GameController : BaseController
 {
     private readonly GameService _gameService;
-    private readonly TrickService _trickService;
     private readonly GameRepository _gameRepository;
     private readonly BidRepository _bidRepository;
     private readonly GameRules _gameRules;
@@ -20,14 +19,12 @@ public class GameController : BaseController
     public GameController(
         GameService gameService,
         PlayerService playerService,
-        TrickService trickService,
         GameRepository gameRepository,
         BidRepository bidRepository,
         GameRules gameRules)
         : base(playerService)
     {
         _gameService = gameService;
-        _trickService = trickService;
         _gameRepository = gameRepository;
         _bidRepository = bidRepository;
         _gameRules = gameRules;
@@ -82,9 +79,13 @@ public class GameController : BaseController
         var player = GetCurrentPlayer();
         if (player == null) return BadRequest();
 
-        var trickPlayed = _trickService.PlayCard(cardDto, id, player);
-        if (trickPlayed == false) return BadRequest();
-        
+        var game = _gameRepository.FindByIdWithRoundsAndTricks(id);
+        if (game == null) return NotFound();
+
+        var action = new PlayCardAction(_gameRules, cardDto);
+        if (!action.Execute(game, player)) return BadRequest();
+
+        _gameRepository.SaveChanges();
         var gameState = _gameService.GetGameState(id, player.Id);
         return Ok(gameState);
     }
