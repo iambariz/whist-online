@@ -41,6 +41,7 @@ public class BidAction : RoundAction
     {
         var currentRound = GetCurrentRound(game)!;
         var bid = new Bid { Amount = _amount, PlayerId = player.Id, RoundId = currentRound.Id };
+        currentRound.Bids.Add(bid);
         _bidRepository.Add(bid);
         Result = bid;
     }

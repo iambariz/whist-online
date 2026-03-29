@@ -22,7 +22,7 @@ public class BidActionTests
     private (Game game, Round round) CreateGameInBidding(int playerCount, int cardsDealt = 5)
     {
         var players = Enumerable.Range(0, playerCount)
-            .Select(i => new Player { Name = $"Player{i}", SeatIndex = i })
+            .Select(i => new Player { Id = Guid.NewGuid(), Name = $"Player{i}", SeatIndex = i })
             .ToList();
 
         var round = new Round { RoundNumber = 1, CardsDealt = cardsDealt };
@@ -138,5 +138,56 @@ public class BidActionTests
         CreateAction(db, 1).Execute(game, player);
 
         Assert.Equal(1, game.CurrentPlayerIndex);
+    }
+
+    [Fact]
+    public void Execute_SetsStatusToPlaying_WhenAllPlayersBid()
+    {
+        var db = CreateDb();
+        var (game, round) = CreateGameInBidding(3, cardsDealt: 5);
+
+        var p0 = game.Players.First(p => p.SeatIndex == 0);
+        var p1 = game.Players.First(p => p.SeatIndex == 1);
+        var p2 = game.Players.First(p => p.SeatIndex == 2);
+
+        round.Bids.Add(new Bid { PlayerId = p0.Id, Amount = 1 });
+        round.Bids.Add(new Bid { PlayerId = p1.Id, Amount = 1 });
+        game.CurrentPlayerIndex = 2;
+
+        CreateAction(db, 1).Execute(game, p2);
+
+        Assert.Equal(GameStatus.Playing, game.Status);
+    }
+
+    [Fact]
+    public void Execute_DoesNotSetStatusToPlaying_WhenNotAllPlayersBid()
+    {
+        var db = CreateDb();
+        var (game, _) = CreateGameInBidding(3);
+        var player = game.Players.First(p => p.SeatIndex == 0);
+
+        CreateAction(db, 1).Execute(game, player);
+
+        Assert.Equal(GameStatus.Bidding, game.Status);
+    }
+
+    [Fact]
+    public void Execute_CreatesFirstTrick_WhenAllPlayersBid()
+    {
+        var db = CreateDb();
+        var (game, round) = CreateGameInBidding(3, cardsDealt: 5);
+
+        var p0 = game.Players.First(p => p.SeatIndex == 0);
+        var p1 = game.Players.First(p => p.SeatIndex == 1);
+        var p2 = game.Players.First(p => p.SeatIndex == 2);
+
+        round.Bids.Add(new Bid { PlayerId = p0.Id, Amount = 1 });
+        round.Bids.Add(new Bid { PlayerId = p1.Id, Amount = 1 });
+        game.CurrentPlayerIndex = 2;
+
+        CreateAction(db, 1).Execute(game, p2);
+
+        Assert.Single(round.Tricks);
+        Assert.Equal(1, round.Tricks[0].TrickNumber);
     }
 }
