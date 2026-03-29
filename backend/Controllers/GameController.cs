@@ -15,19 +15,25 @@ public class GameController : BaseController
     private readonly GameRepository _gameRepository;
     private readonly BidRepository _bidRepository;
     private readonly GameRules _gameRules;
+    private readonly TrickService _trickService;
+    private readonly ScoringService _scoringService;
 
     public GameController(
         GameService gameService,
         PlayerService playerService,
         GameRepository gameRepository,
         BidRepository bidRepository,
-        GameRules gameRules)
+        GameRules gameRules,
+        TrickService trickService,
+        ScoringService scoringService)
         : base(playerService)
     {
         _gameService = gameService;
         _gameRepository = gameRepository;
         _bidRepository = bidRepository;
         _gameRules = gameRules;
+        _trickService = trickService;
+        _scoringService = scoringService;
     }
     
     [Authorize]
@@ -82,7 +88,7 @@ public class GameController : BaseController
         var game = _gameRepository.FindByIdWithRoundsAndTricks(id);
         if (game == null) return NotFound();
 
-        var action = new PlayCardAction(_gameRules, cardDto);
+        var action = new PlayCardAction(_gameRules, cardDto, _trickService, _scoringService, _gameService);
         if (!action.Execute(game, player)) return BadRequest();
 
         _gameRepository.SaveChanges();

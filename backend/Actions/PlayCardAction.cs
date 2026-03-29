@@ -1,17 +1,23 @@
 using WhistOnline.API.DTOs;
 using WhistOnline.API.Models;
+using WhistOnline.API.Services;
 
 namespace WhistOnline.API.Actions;
 
 public class PlayCardAction : RoundAction
 {
     private readonly PlayCardDto _playCardDto;
-    private readonly User
+    private readonly TrickService _trickService;
+    private readonly ScoringService _scoringService;
+    private readonly GameService _gameService;
 
-    public PlayCardAction(GameRules gameRules, PlayCardDto playCardDto)
+    public PlayCardAction(GameRules gameRules, PlayCardDto playCardDto, TrickService trickService, ScoringService scoringService, GameService gameService)
         : base(gameRules)
     {
         _playCardDto = playCardDto;
+        _trickService = trickService;
+        _scoringService = scoringService;
+        _gameService = gameService;
     }
 
     protected override bool Validate(Game game, Player player)
@@ -28,46 +34,28 @@ public class PlayCardAction : RoundAction
 
     protected override void ExecuteInternal(Game game, Player player)
     {
-        var card = player.Hand.First(c => c.Suit == _playCardDto.Suit && c.Rank == _playCardDto.Rank);                
-        var currentTrick = game.Rounds.Last().Tricks.Last();                                                                               
+        var card = player.Hand.First(c => c.Suit == _playCardDto.Suit && c.Rank == _playCardDto.Rank);
+        var currentTrick = game.Rounds.Last().Tricks.Last();
         currentTrick.CardsPlayed.Add(new CardPlay { PlayerId = player.Id, Card = card, TrickId = currentTrick.Id });
-        if (currentTrick.LeadSuit == null) currentTrick.LeadSuit = card.Suit;  
+        if (currentTrick.LeadSuit == null) currentTrick.LeadSuit = card.Suit;
         player.Hand.Remove(card);
     }
 
-    protected override void AfterAction(Game game)                                                                                     
-    {                                                                                                                                
-        var currentTrick = game.Rounds.Last().Tricks.Last();
-        if (currentTrick.CardsPlayed.Count == game.Players.Count)
-        {                                                                                                                              
-            EvaluateTrick(game, currentTrick);
-            EvaluateRound(game, currentTrick);
-            // TODO: EvaluateRound if no cards left                                                                                    
-        }                                                                                                                              
-    }
-
-    
-    private void EvaluateTrick(Game game, Trick currentTrick)                                                                          
-    {
-        var playedCards = currentTrick.CardsPlayed;                                                                                    
-        var winner = playedCards                                                                                                       
-                         .Where(cp => cp.Card.Suit == game.TrumpSuit)
-                         .MaxBy(cp => cp.Card.Rank)                                                                                                 
-                     ?? playedCards                                                                                                           
-                         .Where(cp => cp.Card.Suit == currentTrick.LeadSuit)
-                         .MaxBy(cp => cp.Card.Rank);                                                                                            
-   
-        if (winner == null) return;                                                                                                    
-                                                                                                                                   
-        currentTrick.WinnerPlayerId = winner.PlayerId;                                                                                 
-        var winnerPlayer = game.Players.First(p => p.Id == winner.PlayerId);
-        game.CurrentPlayerIndex = winnerPlayer.SeatIndex;                                                                              
-    }
-
-    private void EvaluateRound(Game game)
-    {
-        
-    }
+     protected override void AfterAction(Game game)                                                                                                                                                                                                                                                                      
+      {                                                                                                                                                                                                                                                                                                                   
+          if (!IsTrickComplete(game)) return;                                                                                                                                                                                                                                                                             
+          _trickService.EvaluateTrick(game, game.Rounds.Last().Tricks.Last());                                                                                                                                                                                                                                            
+       
+          if (!IsRoundComplete(game)) return;                                                                                                                                                                                                                                                                             
+          _scoringService.EvaluateRound(game);
+          _gameService.AdvanceRound(game);
+      }                                                                                                                                                                                                                                                                                                                   
+                                                                
+      private bool IsTrickComplete(Game game) =>
+          game.Rounds.Last().Tricks.Last().CardsPlayed.Count == game.Players.Count;
+                                                                                                                                                                                                                                                                                                                          
+      private bool IsRoundComplete(Game game) =>
+          game.Players.All(p => p.Hand.Count == 0);     
 
     private bool PlayerHasCard(Player player)
     {

@@ -45,6 +45,5 @@ public class BidAction : RoundAction
         Result = bid;
     }
 
-    private Round? GetCurrentRound(Game game) =>
-        game.Rounds.FirstOrDefault(r => r.RoundNumber == game.CurrentRound);
+    private Round? GetCurrentRound(Game game) => game.Rounds.FirstOrDefault(r => r.RoundNumber == game.CurrentRound);
 }

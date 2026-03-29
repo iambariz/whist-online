@@ -58,6 +58,26 @@ public class GameService
         };
     }
 
+    public void AdvanceRound(Game game)
+    {
+        if (game.CurrentRound == game.TotalRounds)
+        {
+            game.Status = GameStatus.Finished;
+        }
+        else
+        {
+            game.CurrentRound++;
+            RotateTrumpSuit(game);
+        }
+    }
+
+    private void RotateTrumpSuit(Game game)
+    {
+        var suits = Enum.GetValues<Suit>();
+        var currentIndex = game.TrumpSuit.HasValue ? Array.IndexOf(suits, game.TrumpSuit.Value) : -1;                                                                                                                                                                                                                   
+        game.TrumpSuit = suits[(currentIndex + 1) % suits.Length];                                                                                                                                                                                                                                                      
+    }                                                                                                                                                                                                                                                                                                                   
+
     private bool ValidateGameStart(Game game, Guid playerId)
     {
         return game.Players.Any(p => p.Id == playerId) &&
