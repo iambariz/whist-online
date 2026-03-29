@@ -189,4 +189,83 @@ public class GameServiceTests
         Assert.NotNull(result);
         Assert.All(result.Players!, p => Assert.Equal(13, p.CardCount));
     }
+
+    // AdvanceRound tests
+
+    [Fact]
+    public void AdvanceRound_SetsStatusToFinished_WhenLastRound()
+    {
+        var db = CreateDb();
+        var service = CreateService(db);
+        var game = new Game { CurrentRound = 3, TotalRounds = 3 };
+
+        service.AdvanceRound(game);
+
+        Assert.Equal(GameStatus.Finished, game.Status);
+    }
+
+    [Fact]
+    public void AdvanceRound_IncrementsCurrentRound_WhenNotLastRound()
+    {
+        var db = CreateDb();
+        var service = CreateService(db);
+        var game = new Game { CurrentRound = 1, TotalRounds = 3, TrumpSuit = Suit.Clubs };
+
+        service.AdvanceRound(game);
+
+        Assert.Equal(2, game.CurrentRound);
+    }
+
+    [Fact]
+    public void AdvanceRound_RotatesTrumpSuit_WhenNotLastRound()
+    {
+        var db = CreateDb();
+        var service = CreateService(db);
+        var game = new Game { CurrentRound = 1, TotalRounds = 3, TrumpSuit = Suit.Clubs };
+
+        service.AdvanceRound(game);
+
+        Assert.Equal(Suit.Diamonds, game.TrumpSuit);
+    }
+
+    // RotateTrumpSuit tests
+
+    [Theory]
+    [InlineData(Suit.Clubs, Suit.Diamonds)]
+    [InlineData(Suit.Diamonds, Suit.Hearts)]
+    [InlineData(Suit.Hearts, Suit.Spades)]
+    public void AdvanceRound_CyclesThroughSuits(Suit current, Suit expected)
+    {
+        var db = CreateDb();
+        var service = CreateService(db);
+        var game = new Game { CurrentRound = 1, TotalRounds = 10, TrumpSuit = current };
+
+        service.AdvanceRound(game);
+
+        Assert.Equal(expected, game.TrumpSuit);
+    }
+
+    [Fact]
+    public void AdvanceRound_SetsNullTrump_WhenLastSuit()
+    {
+        var db = CreateDb();
+        var service = CreateService(db);
+        var game = new Game { CurrentRound = 1, TotalRounds = 10, TrumpSuit = Suit.Spades };
+
+        service.AdvanceRound(game);
+
+        Assert.Null(game.TrumpSuit);
+    }
+
+    [Fact]
+    public void AdvanceRound_WrapsBackToClubs_WhenNoTrump()
+    {
+        var db = CreateDb();
+        var service = CreateService(db);
+        var game = new Game { CurrentRound = 1, TotalRounds = 10, TrumpSuit = null };
+
+        service.AdvanceRound(game);
+
+        Assert.Equal(Suit.Clubs, game.TrumpSuit);
+    }
 }

@@ -74,8 +74,15 @@ public class GameService
     private void RotateTrumpSuit(Game game)
     {
         var suits = Enum.GetValues<Suit>();
-        var currentIndex = game.TrumpSuit.HasValue ? Array.IndexOf(suits, game.TrumpSuit.Value) : -1;                                                                                                                                                                                                                   
-        game.TrumpSuit = suits[(currentIndex + 1) % suits.Length];                                                                                                                                                                                                                                                      
+        if (!game.TrumpSuit.HasValue)
+        {
+            game.TrumpSuit = suits[0];
+            return;
+        }
+        var currentIndex = Array.IndexOf(suits, game.TrumpSuit.Value);
+        game.TrumpSuit = currentIndex == suits.Length - 1
+            ? null
+            : suits[currentIndex + 1];
     }                                                                                                                                                                                                                                                                                                                   
 
     private bool ValidateGameStart(Game game, Guid playerId)
