@@ -45,5 +45,17 @@ public class BidAction : RoundAction
         Result = bid;
     }
 
+    protected override void AfterAction(Game game)
+    {
+        var currentRound = GetCurrentRound(game)!;
+        if (currentRound.Bids.Count < game.Players.Count) return;
+        game.Status = GameStatus.Playing;
+        currentRound.Tricks.Add(new Trick                                                                                                  
+        {                                                                                                                                  
+            TrickNumber = currentRound.Tricks.Count + 1,                                                                                   
+            RoundId = currentRound.Id                             
+        });
+    }
+
     private Round? GetCurrentRound(Game game) => game.Rounds.FirstOrDefault(r => r.RoundNumber == game.CurrentRound);
 }

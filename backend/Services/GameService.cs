@@ -26,6 +26,13 @@ public class GameService
 
         DistributeHandsToPlayers(PrepareHands(game.Players), game.Players);
 
+        // TODO: Set game.TotalRounds based on player count / game variant
+        // TODO: Set game.CurrentRound = 1
+        // TODO: Set game.TrumpSuit for round 1
+        // TODO: Set game.DealerIndex
+        // TODO: Set game.CurrentPlayerIndex to left of dealer
+        // TODO: Create Round entity for round 1 (RoundNumber, CardsDealt, TrumpSuit)
+
         game.Status = GameStatus.Bidding;
         _gameRepository.SaveChanges();
         return game;
@@ -68,6 +75,11 @@ public class GameService
         {
             game.CurrentRound++;
             RotateTrumpSuit(game);
+            // TODO: Set game.DealerIndex to next player (rotate)
+            // TODO: Set game.CurrentPlayerIndex to left of new dealer
+            // TODO: Create new Round entity (RoundNumber, CardsDealt, TrumpSuit)
+            // TODO: Deal new hands to all players
+            // TODO: Set game.Status = GameStatus.Bidding
         }
     }
 

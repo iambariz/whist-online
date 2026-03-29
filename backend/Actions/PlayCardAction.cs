@@ -46,7 +46,9 @@ public class PlayCardAction : RoundAction
           if (!IsTrickComplete(game)) return;                                                                                                                                                                                                                                                                             
           _trickService.EvaluateTrick(game, game.Rounds.Last().Tricks.Last());                                                                                                                                                                                                                                            
        
-          if (!IsRoundComplete(game)) return;                                                                                                                                                                                                                                                                             
+          // TODO: Create a new Trick for the next trick in this round
+
+          if (!IsRoundComplete(game)) return;
           _scoringService.EvaluateRound(game);
           _gameService.AdvanceRound(game);
       }                                                                                                                                                                                                                                                                                                                   
