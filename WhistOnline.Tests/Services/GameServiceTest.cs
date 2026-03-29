@@ -94,7 +94,7 @@ public class GameServiceTests
     }
 
     [Fact]
-    public void StartGame_DealsEqualHandsToAllPlayers_WhenValid()
+    public void StartGame_DealsOneCardPerPlayer_ForRoundOne()
     {
         var db = CreateDb();
         var game = CreateGameWithPlayers(db, 4);
@@ -103,20 +103,35 @@ public class GameServiceTests
         var result = service.StartGame(game.Id, game.Players[0].Id);
 
         Assert.NotNull(result);
-        Assert.All(result.Players, p => Assert.Equal(13, p.Hand.Count)); // 52 / 4 = 13
+        Assert.All(result.Players, p => Assert.Equal(1, p.Hand.Count));
     }
 
     [Fact]
-    public void StartGame_TrimsAndDealsEqualHands_ForThreePlayers()
+    public void StartGame_SetsTotalRounds_BasedOnPlayerCount()
     {
         var db = CreateDb();
-        var game = CreateGameWithPlayers(db, 3);
+        var game = CreateGameWithPlayers(db, 4);
         var service = CreateService(db);
 
         var result = service.StartGame(game.Id, game.Players[0].Id);
 
         Assert.NotNull(result);
-        Assert.All(result.Players, p => Assert.Equal(16, p.Hand.Count)); // 48 / 3 = 16
+        Assert.Equal(13, result.TotalRounds); // 52 / 4 = 13
+    }
+
+    [Fact]
+    public void StartGame_CreatesFirstRound()
+    {
+        var db = CreateDb();
+        var game = CreateGameWithPlayers(db, 4);
+        var service = CreateService(db);
+
+        var result = service.StartGame(game.Id, game.Players[0].Id);
+
+        Assert.NotNull(result);
+        Assert.Single(result.Rounds);
+        Assert.Equal(1, result.Rounds[0].RoundNumber);
+        Assert.Equal(1, result.Rounds[0].CardsDealt);
     }
 
     // GetGameState tests
@@ -172,7 +187,7 @@ public class GameServiceTests
 
         Assert.NotNull(result);
         Assert.NotNull(result.MyHand);
-        Assert.Equal(13, result.MyHand!.Count);
+        Assert.Equal(1, result.MyHand!.Count);
     }
 
     [Fact]
@@ -187,17 +202,32 @@ public class GameServiceTests
         var result = service.GetGameState(game.Id, playerId);
 
         Assert.NotNull(result);
-        Assert.All(result.Players!, p => Assert.Equal(13, p.CardCount));
+        Assert.All(result.Players!, p => Assert.Equal(1, p.CardCount));
     }
 
     // AdvanceRound tests
+
+    private Game CreateGameForAdvance(int currentRound, int totalRounds, Suit? trumpSuit, int playerCount = 4)
+    {
+        var players = Enumerable.Range(0, playerCount)
+            .Select(i => new Player { Id = Guid.NewGuid(), SeatIndex = i })
+            .ToList();
+        return new Game
+        {
+            CurrentRound = currentRound,
+            TotalRounds = totalRounds,
+            TrumpSuit = trumpSuit,
+            DealerIndex = 0,
+            Players = players
+        };
+    }
 
     [Fact]
     public void AdvanceRound_SetsStatusToFinished_WhenLastRound()
     {
         var db = CreateDb();
         var service = CreateService(db);
-        var game = new Game { CurrentRound = 3, TotalRounds = 3 };
+        var game = CreateGameForAdvance(3, 3, Suit.Clubs);
 
         service.AdvanceRound(game);
 
@@ -209,7 +239,7 @@ public class GameServiceTests
     {
         var db = CreateDb();
         var service = CreateService(db);
-        var game = new Game { CurrentRound = 1, TotalRounds = 3, TrumpSuit = Suit.Clubs };
+        var game = CreateGameForAdvance(1, 13, Suit.Clubs);
 
         service.AdvanceRound(game);
 
@@ -221,11 +251,50 @@ public class GameServiceTests
     {
         var db = CreateDb();
         var service = CreateService(db);
-        var game = new Game { CurrentRound = 1, TotalRounds = 3, TrumpSuit = Suit.Clubs };
+        var game = CreateGameForAdvance(1, 13, Suit.Clubs);
 
         service.AdvanceRound(game);
 
         Assert.Equal(Suit.Diamonds, game.TrumpSuit);
+    }
+
+    [Fact]
+    public void AdvanceRound_CreatesNewRound_WhenNotLastRound()
+    {
+        var db = CreateDb();
+        var service = CreateService(db);
+        var game = CreateGameForAdvance(1, 13, Suit.Clubs);
+
+        service.AdvanceRound(game);
+
+        Assert.Single(game.Rounds);
+        Assert.Equal(2, game.Rounds[0].RoundNumber);
+        Assert.Equal(2, game.Rounds[0].CardsDealt);
+    }
+
+    [Fact]
+    public void AdvanceRound_DealsNewHands_WhenNotLastRound()
+    {
+        var db = CreateDb();
+        var service = CreateService(db);
+        var game = CreateGameForAdvance(1, 13, Suit.Clubs);
+
+        service.AdvanceRound(game);
+
+        Assert.All(game.Players, p => Assert.Equal(2, p.Hand.Count));
+    }
+
+    [Fact]
+    public void AdvanceRound_RotatesDealer_WhenNotLastRound()
+    {
+        var db = CreateDb();
+        var service = CreateService(db);
+        var game = CreateGameForAdvance(1, 13, Suit.Clubs);
+
+        service.AdvanceRound(game);
+
+        Assert.Equal(1, game.DealerIndex);
+        Assert.Equal(2, game.CurrentPlayerIndex);
     }
 
     // RotateTrumpSuit tests
@@ -238,7 +307,7 @@ public class GameServiceTests
     {
         var db = CreateDb();
         var service = CreateService(db);
-        var game = new Game { CurrentRound = 1, TotalRounds = 10, TrumpSuit = current };
+        var game = CreateGameForAdvance(1, 13, current);
 
         service.AdvanceRound(game);
 
@@ -250,7 +319,7 @@ public class GameServiceTests
     {
         var db = CreateDb();
         var service = CreateService(db);
-        var game = new Game { CurrentRound = 1, TotalRounds = 10, TrumpSuit = Suit.Spades };
+        var game = CreateGameForAdvance(1, 13, Suit.Spades);
 
         service.AdvanceRound(game);
 
@@ -262,7 +331,7 @@ public class GameServiceTests
     {
         var db = CreateDb();
         var service = CreateService(db);
-        var game = new Game { CurrentRound = 1, TotalRounds = 10, TrumpSuit = null };
+        var game = CreateGameForAdvance(1, 13, null);
 
         service.AdvanceRound(game);
 

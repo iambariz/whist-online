@@ -46,12 +46,23 @@ public class PlayCardAction : RoundAction
           if (!IsTrickComplete(game)) return;                                                                                                                                                                                                                                                                             
           _trickService.EvaluateTrick(game, game.Rounds.Last().Tricks.Last());                                                                                                                                                                                                                                            
        
-          // TODO: Create a new Trick for the next trick in this round
-
-          if (!IsRoundComplete(game)) return;
+          if (!IsRoundComplete(game))
+          {
+              CreateTrickForRound(game.Rounds.Last());
+              return;
+          }
           _scoringService.EvaluateRound(game);
           _gameService.AdvanceRound(game);
-      }                                                                                                                                                                                                                                                                                                                   
+      }
+
+      private void CreateTrickForRound(Round currentRound)
+      {
+          currentRound.Tricks.Add(new Trick
+          {
+              TrickNumber = currentRound.Tricks.Count + 1,
+              RoundId = currentRound.Id
+          });
+      }
                                                                 
       private bool IsTrickComplete(Game game) =>
           game.Rounds.Last().Tricks.Last().CardsPlayed.Count == game.Players.Count;

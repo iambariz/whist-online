@@ -24,18 +24,34 @@ public class GameService
         if (game == null) return null;
         if (!ValidateGameStart(game, playerId)) return null;
 
-        DistributeHandsToPlayers(PrepareHands(game.Players), game.Players);
-
-        // TODO: Set game.TotalRounds based on player count / game variant
-        // TODO: Set game.CurrentRound = 1
-        // TODO: Set game.TrumpSuit for round 1
-        // TODO: Set game.DealerIndex
-        // TODO: Set game.CurrentPlayerIndex to left of dealer
-        // TODO: Create Round entity for round 1 (RoundNumber, CardsDealt, TrumpSuit)
+        InitGame(game);
+        SetupRound(game, 1);
 
         game.Status = GameStatus.Bidding;
         _gameRepository.SaveChanges();
         return game;
+    }
+
+    private void InitGame(Game game)
+    {
+        var trimmedDeckSize = _deckService.TrimDeck(_deckService.BuildDeck(), game.Players.Count).Count;
+
+        game.TotalRounds = trimmedDeckSize / game.Players.Count;
+        game.CurrentRound = 1;
+        game.TrumpSuit = Suit.Clubs;
+        game.DealerIndex = 0;
+        game.CurrentPlayerIndex = 1 % game.Players.Count;
+    }
+
+    private void SetupRound(Game game, int cardsDealt)
+    {
+        game.Rounds.Add(new Round
+        {
+            RoundNumber = game.CurrentRound,
+            CardsDealt = cardsDealt,
+            TrumpSuit = game.TrumpSuit
+        });
+        DistributeHandsToPlayers(PrepareHands(game.Players, cardsDealt), game.Players);
     }
 
     public GameStateDto? GetGameState(Guid gameId, Guid playerId)
@@ -75,11 +91,11 @@ public class GameService
         {
             game.CurrentRound++;
             RotateTrumpSuit(game);
-            // TODO: Set game.DealerIndex to next player (rotate)
-            // TODO: Set game.CurrentPlayerIndex to left of new dealer
-            // TODO: Create new Round entity (RoundNumber, CardsDealt, TrumpSuit)
-            // TODO: Deal new hands to all players
-            // TODO: Set game.Status = GameStatus.Bidding
+            game.DealerIndex = (game.DealerIndex + 1) % game.Players.Count;
+            game.CurrentPlayerIndex = (game.DealerIndex + 1) % game.Players.Count;
+            
+            SetupRound(game, game.CurrentRound);
+            game.Status = GameStatus.Bidding;
         }
     }
 
@@ -109,11 +125,11 @@ public class GameService
         return game.Players.Any(p => p.Id == playerId);
     }
 
-    private List<List<Card>> PrepareHands(List<Player> players)
+    private List<List<Card>> PrepareHands(List<Player> players, int cardsPerPlayer)
     {
         var deck = _deckService.TrimDeck(_deckService.BuildDeck(), players.Count);
         var shuffled = _deckService.Shuffle(deck);
-        return _deckService.Deal(shuffled, players.Count, shuffled.Count / players.Count);
+        return _deckService.Deal(shuffled, players.Count, cardsPerPlayer);
     }
 
     private void DistributeHandsToPlayers(List<List<Card>> hands, List<Player> players)
