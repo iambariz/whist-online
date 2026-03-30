@@ -17,6 +17,7 @@ public class GameController : BaseController
     private readonly GameRules _gameRules;
     private readonly TrickService _trickService;
     private readonly ScoringService _scoringService;
+    private readonly ScoreBoardService _scoreBoardService;
 
     public GameController(
         GameService gameService,
@@ -25,7 +26,8 @@ public class GameController : BaseController
         BidRepository bidRepository,
         GameRules gameRules,
         TrickService trickService,
-        ScoringService scoringService)
+        ScoringService scoringService,
+        ScoreBoardService scoreBoardService)
         : base(playerService)
     {
         _gameService = gameService;
@@ -34,6 +36,7 @@ public class GameController : BaseController
         _gameRules = gameRules;
         _trickService = trickService;
         _scoringService = scoringService;
+        _scoreBoardService =  scoreBoardService;
     }
     
     [Authorize]
@@ -97,9 +100,15 @@ public class GameController : BaseController
     }
     
     [Authorize]
-    [HttpGet("{id:guid}/scores")]
+    [HttpGet("{id:guid}/scoreboard")]
     public IActionResult GetScoreBoard(Guid id)
     {
-        return Ok();
+        var player = GetCurrentPlayer();
+        if (player == null) return BadRequest();
+
+        var game = _gameRepository.FindByIdWithRoundsAndTricks(id);
+        if (game == null) return NotFound();
+
+        return Ok(_scoreBoardService.GetScoreList(game));
     }
 }
