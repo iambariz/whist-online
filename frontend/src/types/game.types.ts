@@ -13,10 +13,10 @@ export interface PlayerSummary {
 
 export interface GameState {
   gameId: string;
-  status: string;
+  status: "Waiting" | "Bidding" | "Playing" | "Finished";
   currentRound: number;
   totalRounds: number;
-  trumpSuit: string;
+  trumpSuit: "Clubs" | "Diamonds" | "Hearts" | "Spades" | null;
   currentPlayerIndex: number;
   dealerIndex: number;
   players: PlayerSummary[];
