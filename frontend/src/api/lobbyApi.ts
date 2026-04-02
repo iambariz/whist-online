@@ -1,16 +1,14 @@
 import axios from "axios";
-import type { GameState } from "../types/game.types";
+import type { GameState, Lobby } from "../types/game.types";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
-export const getLobbies = async (token: string): Promise<GameState[]> => {
-  const res = await axios.get(`${BASE_URL}/lobbies`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+export const getLobbies = async (): Promise<Lobby[]> => {
+  const res = await axios.get(`${BASE_URL}/lobbies`);
   return res.data;
 }
 
-export const createLobby = async (token: string): Promise<GameState> => {
+export const createLobby = async (token: string): Promise<Lobby> => {
   const res = await axios.post(`${BASE_URL}/lobbies`, {}, {
     headers: { Authorization: `Bearer ${token}` },
   });
