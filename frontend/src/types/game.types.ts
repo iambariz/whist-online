@@ -28,3 +28,10 @@ export interface Lobby {
   status: string;
   players: PlayerSummary[];
 }
+
+export interface Player {
+  id: string
+  name: string
+  token: string
+}
+
