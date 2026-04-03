@@ -27,6 +27,7 @@ builder.Services.AddScoped<TrickService>();
 builder.Services.AddScoped<ScoringService>();
 builder.Services.AddScoped<GameRules>();
 builder.Services.AddScoped<ScoreBoardService>();
+builder.Services.AddScoped<DeckService>();
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
     {
