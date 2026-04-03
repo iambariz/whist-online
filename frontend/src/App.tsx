@@ -10,7 +10,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/lobby" element={<LobbyPage />} />
+        <Route path="/lobby/:id" element={<LobbyPage />} />
         <Route path="/game/:id" element={<GamePage />} />
       </Routes>
     </BrowserRouter>
