@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { createPlayer } from "../api/userApi";
+import PlayerNameForm from "./components/PlayerNameForm";
+import LobbyList from "./components/LobbyList";
 
 const HomePage = () => {
   const [playerName, setPlayerName] = useState("");
@@ -14,21 +16,27 @@ const HomePage = () => {
     setPlayerToken(player.token);
   };
 
+  const joinLobby = async (lobbyId: string) => {
+    console.log(`Joining lobby ${lobbyId} with token ${playerToken}`);
+    // After joining, you might want to fetch the updated list of lobbies or navigate to the lobby page
+  };
+
   return (
     <div>
       <h1>Whist Online</h1>
-      <form onSubmit={registerPlayer}>
-        <input
-          type="text"
-          placeholder="Your name"
-          value={playerName}
-          onChange={(e) => setPlayerName(e.target.value)}
+      {playerToken ? (
+        <LobbyList
+          playerName={playerName}
+          lobbies={lobbies}
+          joinLobby={joinLobby}
         />
-        <button type="submit">Register</button>
-      </form>
-
-      <h2>Open Lobbies</h2>
-      <ul>{/* lobby list will go here */}</ul>
+      ) : (
+        <PlayerNameForm
+          playerName={playerName}
+          setPlayerName={setPlayerName}
+          onSubmit={registerPlayer}
+        />
+      )}
     </div>
   );
 };
