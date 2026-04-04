@@ -1,18 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { createPlayer } from "../api/userApi";
+import { getLobbies } from "../api/lobbyApi";
 import PlayerNameForm from "./components/PlayerNameForm";
 import LobbyList from "./components/LobbyList";
+import type { Lobby } from "../types/game.types";
 
 const HomePage = () => {
   const [playerName, setPlayerName] = useState(
     () => localStorage.getItem("wh_player_name") ?? "",
   );
-  const [lobbies, setLobbies] = useState([]);
+  const [lobbies, setLobbies] = useState<Lobby[]>([]);
   const [playerToken, setPlayerToken] = useState(
     () => localStorage.getItem("wh_token") ?? "",
   );
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    const fetchLobbies = async () => {
+      const lobbies = await getLobbies();
+      setLobbies(lobbies);
+    };
+    fetchLobbies();
+  }, []);
 
   const registerPlayer = async (
     event: React.SyntheticEvent<HTMLFormElement>,
