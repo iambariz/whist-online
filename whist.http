@@ -1,0 +1,72 @@
+@baseUrl = http://localhost:5009/api
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjAxOWQ1ZTAzLTQ1YzktN2MxYy1hMGNmLWM1ZDg0MjU3N2NjNSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJBbGljZSIsImV4cCI6MTc3NTQ4NTE2NiwiaXNzIjoiV2hpc3RPbmxpbmUiLCJhdWQiOiJXaGlzdE9ubGluZSJ9.sdtmEm-vpqJPiSL-lJw3rFjCqqb9gU9z-yCfQVksiQc
+@lobbyId = YOUR_LOBBY_ID_HERE
+@gameId = YOUR_GAME_ID_HERE
+
+### Create Player
+# Copy the token from the response and paste it into @token above
+POST {{baseUrl}}/players
+Content-Type: application/json
+
+{
+  "name": "Alice"
+}
+
+### Get Player
+GET {{baseUrl}}/players/{{token}}
+Authorization: Bearer {{token}}
+
+### Get Lobbies
+GET {{baseUrl}}/lobbies
+
+### Create Lobby
+POST {{baseUrl}}/lobbies
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{}
+
+### Delete Lobby
+DELETE {{baseUrl}}/lobbies/{{lobbyId}}
+Authorization: Bearer {{token}}
+
+### Join Lobby
+POST {{baseUrl}}/lobbies/{{lobbyId}}/join
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{}
+
+### Start Game
+POST {{baseUrl}}/games/{{gameId}}/start
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{}
+
+### Get Game State
+GET {{baseUrl}}/games/{{gameId}}
+Authorization: Bearer {{token}}
+
+### Submit Bid
+POST {{baseUrl}}/games/{{gameId}}/bid
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "bid": 2
+}
+
+### Play Card
+POST {{baseUrl}}/games/{{gameId}}/play
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "suit": "Hearts",
+  "rank": "Ace"
+}
+
+### Get Scoreboard
+GET {{baseUrl}}/games/{{gameId}}/scoreboard
+Authorization: Bearer {{token}}
