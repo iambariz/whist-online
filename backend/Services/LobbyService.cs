@@ -1,3 +1,4 @@
+using Bogus;
 using WhistOnline.API.Models;
 using WhistOnline.API.Repositories;
 
@@ -25,8 +26,13 @@ public class LobbyService
     }
 
     //Todo: Rate limiting
-    public Game CreateGameForPlayer(Player player, string name)
+    public Game CreateGameForPlayer(Player player, string? name = null)
     {
+        if (name == null)
+        {
+            var faker = new Faker();
+            name = faker.Commerce.ProductAdjective() + faker.Commerce.ProductName().Split(' ')[0];
+        }
         player.SeatIndex = 0;
         var newGame = new Game { Name = name, Players = new List<Player> { player } };
         _gameRepository.Add(newGame);
