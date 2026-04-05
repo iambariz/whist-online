@@ -8,7 +8,7 @@ using WhistOnline.API.Services;
 namespace WhistOnline.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/games")]
 public class GameController : BaseController
 {
     private readonly GameService _gameService;

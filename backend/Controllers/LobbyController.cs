@@ -5,7 +5,7 @@ using WhistOnline.API.Services;
 namespace WhistOnline.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/lobbies")]
 public class LobbyController : BaseController
 {
     private readonly LobbyService _lobbyService;
