@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { uniqueNamesGenerator, adjectives, animals } from "unique-names-generator";
 import { createPlayer } from "../api/userApi";
-import { getLobbies } from "../api/lobbyApi";
+import { getLobbies, createLobby } from "../api/lobbyApi";
 import PlayerNameForm from "./components/PlayerNameForm";
 import LobbyList from "./components/LobbyList";
 import type { Lobby } from "../types/game.types";
@@ -33,9 +34,13 @@ const HomePage = () => {
     localStorage.setItem("wh_player_name", player.name);
   };
 
+  const handleCreateLobby = async () => {
+    const name = uniqueNamesGenerator({ dictionaries: [adjectives, animals], style: "capital", separator: "" });
+    await createLobby(playerToken, name);
+  };
+
   const joinLobby = async (lobbyId: string) => {
     console.log(`Joining lobby ${lobbyId} with token ${playerToken}`);
-    // After joining, you might want to fetch the updated list of lobbies or navigate to the lobby page
   };
 
   return (
@@ -46,6 +51,7 @@ const HomePage = () => {
           playerName={playerName}
           lobbies={lobbies}
           joinLobby={joinLobby}
+          createLobby={handleCreateLobby}
         />
       ) : (
         <PlayerNameForm

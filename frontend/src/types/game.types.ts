@@ -25,6 +25,8 @@ export interface GameState {
 
 export interface Lobby {
   id: string;
+  name: string;
+  maxPlayers: number;
   status: string;
   players: PlayerSummary[];
 }
