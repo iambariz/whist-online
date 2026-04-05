@@ -12,7 +12,9 @@ public enum GameStatus
 public class Game
 {
     public Guid Id { get; set; }
-    public GameStatus Status { get; set; } = GameStatus.Waiting;                                                                       
+    public string Name { get; set; } = string.Empty;
+    public int MaxPlayers { get; set; } = 4;
+    public GameStatus Status { get; set; } = GameStatus.Waiting;
     public int CurrentRound { get; set; }
     public int TotalRounds { get; set; }
     public Suit? TrumpSuit { get; set; }

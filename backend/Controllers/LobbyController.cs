@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WhistOnline.API.DTOs;
 using WhistOnline.API.Services;
 
 namespace WhistOnline.API.Controllers;
@@ -26,12 +27,12 @@ public class LobbyController : BaseController
     
     [Authorize]
     [HttpPost]
-    public IActionResult Create()
+    public IActionResult Create([FromBody] CreateLobbyRequest request)
     {
         var player = GetCurrentPlayer();
         if (player == null) return BadRequest();
 
-        var createdLobby = _lobbyService.CreateGameForPlayer(player);
+        var createdLobby = _lobbyService.CreateGameForPlayer(player, request.Name);
         return Ok(createdLobby);
     }
     

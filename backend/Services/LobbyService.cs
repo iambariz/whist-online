@@ -25,10 +25,10 @@ public class LobbyService
     }
 
     //Todo: Rate limiting
-    public Game CreateGameForPlayer(Player player)
+    public Game CreateGameForPlayer(Player player, string name)
     {
         player.SeatIndex = 0;
-        var newGame = new Game { Players = new List<Player> { player } };
+        var newGame = new Game { Name = name, Players = new List<Player> { player } };
         _gameRepository.Add(newGame);
         _gameRepository.SaveChanges();
         return newGame;
