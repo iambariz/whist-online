@@ -31,7 +31,7 @@ public class LobbyService
         if (name == null)
         {
             var faker = new Faker();
-            name = faker.Commerce.ProductAdjective() + faker.Commerce.ProductName().Split(' ')[0];
+            name = faker.Hacker.Adjective() + faker.Hacker.Noun();
         }
         player.SeatIndex = 0;
         var newGame = new Game { Name = name, Players = new List<Player> { player } };
