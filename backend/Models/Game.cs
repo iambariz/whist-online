@@ -13,7 +13,7 @@ public class Game
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public int MaxPlayers { get; set; } = 4;
+    public int MaxPlayers { get; set; } = 7;
     public GameStatus Status { get; set; } = GameStatus.Waiting;
     public int CurrentRound { get; set; }
     public int TotalRounds { get; set; }

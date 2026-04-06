@@ -69,6 +69,8 @@ public class GameService
             TrumpSuit = game.TrumpSuit?.ToString(),
             CurrentPlayerIndex = game.CurrentPlayerIndex,
             DealerIndex = game.DealerIndex,
+            MinPlayers = MinPlayers,
+            MaxPlayers = MaxPlayers,
             Players = game.Players.Select(p => new PlayerSummaryDto
             {
                 Id = p.Id,

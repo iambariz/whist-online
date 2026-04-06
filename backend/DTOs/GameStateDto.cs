@@ -11,6 +11,8 @@ public class GameStateDto
     public string? TrumpSuit { get; set; }
     public int CurrentPlayerIndex { get; set; }                               
     public int DealerIndex { get; set; }
-    public List<PlayerSummaryDto>? Players { get; set; }                       
-    public List<Card>? MyHand { get; set; }                                    
+    public int MinPlayers { get; set; }
+    public int MaxPlayers { get; set; }
+    public List<PlayerSummaryDto>? Players { get; set; }
+    public List<Card>? MyHand { get; set; }
 }
