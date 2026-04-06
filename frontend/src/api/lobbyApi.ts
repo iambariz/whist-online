@@ -9,16 +9,16 @@ export const getLobbies = async (): Promise<Lobby[]> => {
   return res.data;
 }
 
-export const createLobby = async (token: string, name: string): Promise<Lobby> => {
+export const createLobby = async (token: string): Promise<Lobby> => {
   const res = await axios.post(
     `${BASE_URL}/lobbies`,
-    { name },
+    {},
     {
       headers: { Authorization: `Bearer ${token}` },
     },
   );
   return res.data;
-}
+};
 
 export const joinLobby = async (lobbyId: string, token: string): Promise<GameState> => {
   const res = await axios.post(

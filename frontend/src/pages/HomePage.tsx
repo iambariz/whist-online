@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { uniqueNamesGenerator, adjectives, animals } from "unique-names-generator";
 import { createPlayer } from "../api/userApi";
 import { getLobbies, createLobby } from "../api/lobbyApi";
 import PlayerNameForm from "./components/PlayerNameForm";
@@ -35,8 +34,7 @@ const HomePage = () => {
   };
 
   const handleCreateLobby = async () => {
-    const name = uniqueNamesGenerator({ dictionaries: [adjectives, animals], style: "capital", separator: "" });
-    await createLobby(playerToken, name);
+    await createLobby(playerToken);
   };
 
   const joinLobby = async (lobbyId: string) => {
