@@ -43,7 +43,7 @@ const HomePage = () => {
 
   return (
     <div>
-      <h1>Whist Online</h1>
+      <h1>Nomination Whist Online</h1>
       {playerToken ? (
         <LobbyList
           playerName={playerName}
