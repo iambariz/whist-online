@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { createPlayer } from "../api/userApi";
-import { getLobbies, createLobby } from "../api/lobbyApi";
+import { getLobbies, createLobby, joinLobby } from "../api/lobbyApi";
 import PlayerNameForm from "./components/PlayerNameForm";
 import LobbyList from "./components/LobbyList";
 import type { Lobby } from "../types/game.types";
@@ -37,8 +37,8 @@ const HomePage = () => {
     await createLobby(playerToken);
   };
 
-  const joinLobby = async (lobbyId: string) => {
-    console.log(`Joining lobby ${lobbyId} with token ${playerToken}`);
+  const handleJoinLobby = async (lobbyId: string) => {
+    await joinLobby(lobbyId, playerToken);
   };
 
   return (
@@ -48,7 +48,7 @@ const HomePage = () => {
         <LobbyList
           playerName={playerName}
           lobbies={lobbies}
-          joinLobby={joinLobby}
+          joinLobby={handleJoinLobby}
           createLobby={handleCreateLobby}
         />
       ) : (
