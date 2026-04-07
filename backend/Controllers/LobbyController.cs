@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WhistOnline.API.DTOs;
+using WhistOnline.API.Models;
 using WhistOnline.API.Services;
 
 namespace WhistOnline.API.Controllers;
@@ -51,9 +52,16 @@ public class LobbyController : BaseController
         var player = GetCurrentPlayer();
         if (player == null) return BadRequest();
         
-        if (!_lobbyService.JoinLobby(id, player.Id)) return NotFound();
+        var result = _lobbyService.JoinLobby(id, player.Id);
 
-        return Ok();
+        return result switch
+        {
+            JoinLobbyResult.Success => Ok(),
+            JoinLobbyResult.LobbyNotFound => NotFound("Lobby not found"),
+            JoinLobbyResult.AlreadyInLobby => Conflict("Already in lobby"),
+            JoinLobbyResult.LobbyFull => BadRequest("Lobby is full"),
+            _ => StatusCode(500)
+        };
     }
 
 }

@@ -51,18 +51,22 @@ public class LobbyService
         return true;
     }
 
-    public bool JoinLobby(Guid id, Guid playerId)
+    public JoinLobbyResult JoinLobby(Guid id, Guid playerId)
     {
         var player = _playerRepository.FindByIdTracked(playerId);
-        if (player == null) return false;
+        if (player == null) return JoinLobbyResult.LobbyNotFound;
 
         var lobby = _gameRepository.FindOpenLobbyByIdWithPlayers(id);
 
-        if (lobby == null || lobby.Players.Any(p => p.Id == player.Id)) return false;
+        if (lobby == null) return JoinLobbyResult.LobbyNotFound;
+
+        if (lobby.Players.Any(p => p.Id == player.Id)) return JoinLobbyResult.AlreadyInLobby;
+
+        if (lobby.Players.Count >= lobby.MaxPlayers) return JoinLobbyResult.LobbyFull;
 
         lobby.Players.Add(player);
 
         _gameRepository.SaveChanges();
-        return true;
+        return JoinLobbyResult.Success;
     }
 }

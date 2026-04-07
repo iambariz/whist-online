@@ -44,7 +44,7 @@ public class GameRepository
 
     public List<Game> FindOpenLobbies()
     {
-        return _db.Games.Where(g => g.Status == GameStatus.Waiting).ToList();
+        return _db.Games.Include(g => g.Players).Where(g => g.Status == GameStatus.Waiting).ToList();
     }
 
     public Game? FindOpenLobbyByIdWithPlayers(Guid id)
