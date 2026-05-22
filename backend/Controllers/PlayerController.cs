@@ -1,40 +1,44 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WhistOnline.API.Data;
 using WhistOnline.API.DTOs;
-using WhistOnline.API.Models;
 using WhistOnline.API.Services;
 
 namespace WhistOnline.API.Controllers;
 
 [ApiController]
 [Route("api/players")]
-public class PlayerController : ControllerBase
+public class PlayerController : BaseController
 {
-    private readonly PlayerService _playerService;
     private readonly TokenService _tokenService;
-    public PlayerController(PlayerService playerService, TokenService tokenService)                                                                                           
-    {               
-        _playerService = playerService;
-        _tokenService = tokenService;
-    }              
-    
-    [HttpGet("{id}")]                                                                                                                  
-    public IActionResult GetPlayer(Guid id)                                                                                            
-    {                    
-        var playerQuery = _playerService.FindPlayerByGuid(id);
-        
-        return playerQuery != null ? Ok(playerQuery) : NotFound();
-    }  
 
-    [HttpPost()]
+    public PlayerController(PlayerService playerService, TokenService tokenService)
+        : base(playerService)
+    {
+        _tokenService = tokenService;
+    }
+
+    [HttpGet("{id}")]
+    public IActionResult GetPlayer(Guid id)
+    {
+        var player = _playerService.FindPlayerByGuid(id);
+        return player != null ? Ok(player) : NotFound();
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public IActionResult GetMe()
+    {
+        var player = GetCurrentPlayer();
+        return player != null ? Ok(player) : Unauthorized();
+    }
+
+    [HttpPost]
     public IActionResult AddPlayer([FromBody] CreatePlayerRequest player)
     {
-        var playerQuery = _playerService.CreatePlayer(player);
-        
-        if(playerQuery == null) return BadRequest();
-        
-        var token = _tokenService.GenerateToken(playerQuery);                         
-        return CreatedAtAction(nameof(GetPlayer), new { id = playerQuery.Id }, new {  
-            player = playerQuery, token });   
+        var created = _playerService.CreatePlayer(player);
+        if (created == null) return BadRequest();
+
+        var token = _tokenService.GenerateToken(created);
+        return CreatedAtAction(nameof(GetPlayer), new { id = created.Id }, new { player = created, token });
     }
 }
