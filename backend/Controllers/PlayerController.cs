@@ -16,14 +16,7 @@ public class PlayerController : BaseController
     {
         _tokenService = tokenService;
     }
-
-    [HttpGet("{id}")]
-    public IActionResult GetPlayer(Guid id)
-    {
-        var player = _playerService.FindPlayerByGuid(id);
-        return player != null ? Ok(player) : NotFound();
-    }
-
+    
     [Authorize]
     [HttpGet("me")]
     public IActionResult GetMe()
@@ -32,6 +25,13 @@ public class PlayerController : BaseController
         return player != null ? Ok(player) : Unauthorized();
     }
 
+    [HttpGet("{id}")]
+    public IActionResult GetPlayer(Guid id)
+    {
+        var player = _playerService.FindPlayerByGuid(id);
+        return player != null ? Ok(player) : NotFound();
+    }
+    
     [HttpPost]
     public IActionResult AddPlayer([FromBody] CreatePlayerRequest player)
     {
