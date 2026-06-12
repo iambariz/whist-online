@@ -104,7 +104,6 @@ public class LobbyServiceTests
         db.SaveChanges();
 
         var result = CreateService(db).DeleteGame(game.Id);
-
         Assert.True(result);
     }
 
@@ -145,7 +144,7 @@ public class LobbyServiceTests
 
         var result = CreateService(db).JoinLobby(game.Id, player.Id);
 
-        Assert.True(result);
+        Assert.Equal(JoinLobbyResult.Success, result);
     }
 
     [Fact]
@@ -158,7 +157,7 @@ public class LobbyServiceTests
 
         var result = CreateService(db).JoinLobby(game.Id, Guid.NewGuid());
 
-        Assert.False(result);
+        Assert.Equal(JoinLobbyResult.LobbyNotFound, result);
     }
 
     [Fact]
@@ -171,7 +170,7 @@ public class LobbyServiceTests
 
         var result = CreateService(db).JoinLobby(Guid.NewGuid(), player.Id);
 
-        Assert.False(result);
+        Assert.Equal(JoinLobbyResult.LobbyNotFound, result);
     }
 
     [Fact]
@@ -185,7 +184,7 @@ public class LobbyServiceTests
 
         var result = CreateService(db).JoinLobby(game.Id, player.Id);
 
-        Assert.False(result);
+        Assert.Equal(JoinLobbyResult.AlreadyInLobby, result);
     }
 
     [Fact]
@@ -200,6 +199,6 @@ public class LobbyServiceTests
 
         var result = CreateService(db).JoinLobby(game.Id, player.Id);
 
-        Assert.False(result);
+        Assert.Equal(JoinLobbyResult.LobbyNotFound, result);
     }
 }
