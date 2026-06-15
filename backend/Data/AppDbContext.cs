@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Text.Json;
 using WhistOnline.API.Models;
 
@@ -23,6 +24,12 @@ public class AppDbContext : DbContext
             .HasConversion(
                 v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
                 v => JsonSerializer.Deserialize<List<Card>>(v, (JsonSerializerOptions)null!) ?? new List<Card>()
+            )
+            .Metadata.SetValueComparer(
+                new ValueComparer<List<Card>>(
+                    (c1, c2) => c1.SequenceEqual(c2),
+                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => c.ToList())
             );
 
         modelBuilder.Entity<CardPlay>()
@@ -31,6 +38,12 @@ public class AppDbContext : DbContext
             .HasConversion(
                 v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
                 v => JsonSerializer.Deserialize<Card>(v, (JsonSerializerOptions)null!)!
+            )
+            .Metadata.SetValueComparer(
+                new ValueComparer<Card>(
+                    (c1, c2) => c1 == c2,
+                    c => c.GetHashCode(),
+                    c => c)
             );
     }
 }
