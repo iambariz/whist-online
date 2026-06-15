@@ -14,4 +14,7 @@ public class BaseController : ControllerBase
     }
 
     protected Player? GetCurrentPlayer() => _playerService.GetPlayerFromToken(User);
+
+    protected IActionResult ApiError(int statusCode, string message) =>
+        StatusCode(statusCode, new { error = message });
 }

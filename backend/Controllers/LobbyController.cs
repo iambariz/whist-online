@@ -17,51 +17,48 @@ public class LobbyController : BaseController
     {
         _lobbyService = lobbyService;
     }
-    
+
     [HttpGet]
     public IActionResult GetLobbies()
     {
         var lobbies = _lobbyService.FindOpenLobbies();
-        
         return Ok(lobbies);
     }
-    
+
     [Authorize]
     [HttpPost]
     public IActionResult Create([FromBody] CreateLobbyRequest request)
     {
         var player = GetCurrentPlayer();
-        if (player == null) return BadRequest();
+        if (player == null) return ApiError(400, "Could not identify player");
 
         var createdLobby = _lobbyService.CreateGameForPlayer(player, request.Name);
         return Ok(createdLobby);
     }
-    
+
     [HttpDelete("{id:guid}")]
     public IActionResult DeleteLobby(Guid id)
     {
-        //Todo: Validation here
-        if (!_lobbyService.DeleteGame(id)) return NotFound();
-        return NoContent();                                                                                                                
+        if (!_lobbyService.DeleteGame(id)) return ApiError(404, "Lobby not found");
+        return NoContent();
     }
-    
+
     [Authorize]
     [HttpPost("{id:guid}/join")]
     public IActionResult JoinLobby(Guid id)
     {
         var player = GetCurrentPlayer();
-        if (player == null) return BadRequest();
-        
+        if (player == null) return ApiError(400, "Could not identify player");
+
         var result = _lobbyService.JoinLobby(id, player.Id);
 
         return result switch
         {
             JoinLobbyResult.Success => Ok(),
-            JoinLobbyResult.LobbyNotFound => NotFound("Lobby not found"),
-            JoinLobbyResult.AlreadyInLobby => Conflict("Already in lobby"),
-            JoinLobbyResult.LobbyFull => BadRequest("Lobby is full"),
-            _ => StatusCode(500)
+            JoinLobbyResult.LobbyNotFound => ApiError(404, "Lobby not found"),
+            JoinLobbyResult.AlreadyInLobby => ApiError(409, "You are already in this lobby"),
+            JoinLobbyResult.LobbyFull => ApiError(400, "Lobby is full"),
+            _ => ApiError(500, "Something went wrong")
         };
     }
-
 }

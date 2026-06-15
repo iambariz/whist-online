@@ -36,78 +36,77 @@ public class GameController : BaseController
         _gameRules = gameRules;
         _trickService = trickService;
         _scoringService = scoringService;
-        _scoreBoardService =  scoreBoardService;
+        _scoreBoardService = scoreBoardService;
     }
-    
+
     [Authorize]
     [HttpGet("{id:guid}")]
     public IActionResult GetGameState(Guid id)
     {
         var player = GetCurrentPlayer();
-        if (player == null) return BadRequest();
+        if (player == null) return ApiError(400, "Could not identify player");
 
         var gameState = _gameService.GetGameState(id, player.Id);
-        
-        if (gameState == null) return NotFound();
+        if (gameState == null) return ApiError(404, "Game not found");
         return Ok(gameState);
     }
-    
+
     [Authorize]
     [HttpPost("{id:guid}/start")]
     public IActionResult StartGame(Guid id)
     {
         var player = GetCurrentPlayer();
-        if (player == null) return BadRequest();
+        if (player == null) return ApiError(400, "Could not identify player");
 
-        if (_gameService.StartGame(id, player.Id) == null) return NotFound();
+        if (_gameService.StartGame(id, player.Id) == null) return ApiError(404, "Game not found");
         var gameState = _gameService.GetGameState(id, player.Id);
         return Ok(gameState);
     }
-    
+
     [Authorize]
     [HttpPost("{id:guid}/bid")]
-    public IActionResult SubmitBid(Guid id,[FromBody] SubmitBidDto submitBidDto)
+    public IActionResult SubmitBid(Guid id, [FromBody] SubmitBidDto submitBidDto)
     {
         var player = GetCurrentPlayer();
-        if (player == null) return BadRequest();
+        if (player == null) return ApiError(400, "Could not identify player");
 
         var game = _gameRepository.FindByIdWithPlayersAndRoundsAndBids(id);
-        if (game == null) return NotFound();
+        if (game == null) return ApiError(404, "Game not found");
 
         var action = new BidAction(_gameRules, _bidRepository, submitBidDto.Amount);
-        if (!action.Execute(game, player)) return BadRequest();
+        if (!action.Execute(game, player)) return ApiError(400, "Invalid bid");
 
         _gameRepository.SaveChanges();
         return Ok(action.Result);
     }
-    
+
     [Authorize]
     [HttpPost("{id:guid}/play")]
     public IActionResult PlayCard(Guid id, [FromBody] PlayCardDto cardDto)
     {
         var player = GetCurrentPlayer();
-        if (player == null) return BadRequest();
+        if (player == null) return ApiError(400, "Could not identify player");
 
         var game = _gameRepository.FindByIdWithRoundsAndTricks(id);
-        if (game == null) return NotFound();
+        if (game == null) return ApiError(404, "Game not found");
 
         var action = new PlayCardAction(_gameRules, cardDto, _trickService, _scoringService, _gameService);
-        if (!action.Execute(game, player)) return BadRequest();
+        if (!action.Execute(game, player)) return ApiError(400, "Invalid card play");
 
         _gameRepository.SaveChanges();
         var gameState = _gameService.GetGameState(id, player.Id);
         return Ok(gameState);
     }
-    
+
     [Authorize]
     [HttpGet("{id:guid}/scoreboard")]
     public IActionResult GetScoreBoard(Guid id)
     {
         var player = GetCurrentPlayer();
-        if (player == null) return BadRequest();
+        if (player == null) return ApiError(400, "Could not identify player");
 
         var game = _gameRepository.FindByIdWithRoundsAndTricks(id);
-        if (game == null) return NotFound();
+        if (game == null) return ApiError(404, "Game not found");
 
         return Ok(_scoreBoardService.GetScoreList(game));
     }
