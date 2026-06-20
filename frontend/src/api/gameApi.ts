@@ -1,69 +1,27 @@
-import axios from "axios";
+import client from "./client";
 import type { GameState } from "../types/game.types";
 
-const BASE_URL = import.meta.env.VITE_API_URL;
-
-export const getGameState = async (
-  gameId: string,
-  token: string,
-): Promise<GameState> => {
-  const res = await axios.get(`${BASE_URL}/games/${gameId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+export const getGameState = async (gameId: string): Promise<GameState> => {
+  const res = await client.get(`/games/${gameId}`);
   return res.data;
 };
 
-export const startGame = async (
-  gameId: string,
-  token: string,
-): Promise<GameState> => {
-  const res = await axios.post(
-    `${BASE_URL}/games/${gameId}/start`,
-    {},
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    },
-  );
+export const startGame = async (gameId: string): Promise<GameState> => {
+  const res = await client.post(`/games/${gameId}/start`, {});
   return res.data;
 };
 
-export const submitBid = async (
-  gameId: string,
-  token: string,
-  bid: number,
-): Promise<GameState> => {
-  const res = await axios.post(
-    `${BASE_URL}/games/${gameId}/bid`,
-    { bid },
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    },
-  );
+export const submitBid = async (gameId: string, bid: number): Promise<GameState> => {
+  const res = await client.post(`/games/${gameId}/bid`, { bid });
   return res.data;
 };
 
-export const playCard = async (
-  gameId: string,
-  suit: string,
-  rank: string,
-  token: string,
-): Promise<GameState> => {
-  const res = await axios.post(
-    `${BASE_URL}/games/${gameId}/play`,
-    { suit, rank },
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    },
-  );
+export const playCard = async (gameId: string, suit: string, rank: string): Promise<GameState> => {
+  const res = await client.post(`/games/${gameId}/play`, { suit, rank });
   return res.data;
 };
 
-export const getScoreBoard = async (
-  gameId: string,
-  token: string,
-): Promise<GameState> => {
-  const res = await axios.get(`${BASE_URL}/games/${gameId}/scoreboard`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+export const getScoreBoard = async (gameId: string): Promise<GameState> => {
+  const res = await client.get(`/games/${gameId}/scoreboard`);
   return res.data;
 };

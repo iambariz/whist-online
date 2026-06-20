@@ -34,11 +34,11 @@ const HomePage = () => {
   };
 
   const handleCreateLobby = async () => {
-    await createLobby(playerToken);
+    await createLobby();
   };
 
   const handleJoinLobby = async (lobbyId: string) => {
-    await joinLobby(lobbyId, playerToken);
+    await joinLobby(lobbyId);
   };
 
   return (
