@@ -1,3 +1,13 @@
+export const GameStatus = {
+  Waiting: "Waiting",
+  Bidding: "Bidding",
+  Playing: "Playing",
+  Scoring: "Scoring",
+  Finished: "Finished",
+} as const;
+
+export type GameStatus = (typeof GameStatus)[keyof typeof GameStatus];
+
 export interface Card {
   suit: string;
   rank: string;
@@ -13,7 +23,7 @@ export interface PlayerSummary {
 
 export interface GameState {
   gameId: string;
-  status: "Waiting" | "Bidding" | "Playing" | "Finished";
+  status: GameStatus;
   currentRound: number;
   totalRounds: number;
   trumpSuit: "Clubs" | "Diamonds" | "Hearts" | "Spades" | null;
@@ -35,5 +45,6 @@ export interface Player {
   id: string
   name: string
   token: string
+  gameId?: string | null
 }
 
