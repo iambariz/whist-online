@@ -6,19 +6,36 @@ export const GameStatus = {
   Finished: "Finished",
 } as const;
 
-export const TrumpSuits = {
+export const Suits = {
   Clubs: "Clubs",
   Diamonds: "Diamonds",
   Hearts: "Hearts",
   Spades: "Spades",
-};
+} as const;
 
-export type TrumpSuit = (typeof TrumpSuits)[keyof typeof TrumpSuits];
+export const Ranks = {
+  Two: "Two",
+  Three: "Three",
+  Four: "Four",
+  Five: "Five",
+  Six: "Six",
+  Seven: "Seven",
+  Eight: "Eight",
+  Nine: "Nine",
+  Ten: "Ten",
+  Jack: "Jack",
+  Queen: "Queen",
+  King: "King",
+  Ace: "Ace",
+} as const;
+
+export type Suit = (typeof Suits)[keyof typeof Suits];
+export type Rank = (typeof Ranks)[keyof typeof Ranks];
 export type GameStatus = (typeof GameStatus)[keyof typeof GameStatus];
 
 export interface Card {
-  suit: string;
-  rank: string;
+  suit: Suit;
+  rank: Rank;
 }
 
 export interface PlayerSummary {
@@ -34,7 +51,7 @@ export interface GameState {
   status: GameStatus;
   currentRound: number;
   totalRounds: number;
-  trumpSuit: TrumpSuit | null;
+  trumpSuit: Suit | null;
   currentPlayerIndex: number;
   dealerIndex: number;
   players: PlayerSummary[];
@@ -45,7 +62,7 @@ export interface Lobby {
   id: string;
   name: string;
   maxPlayers: number;
-  status: string;
+  status: GameStatus;
   players: PlayerSummary[];
 }
 
