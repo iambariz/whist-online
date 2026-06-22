@@ -34,7 +34,7 @@ public class LobbyService
             name = faker.Hacker.Adjective() + faker.Hacker.Noun();
         }
         player.SeatIndex = 0;
-        var newGame = new Game { Name = name, Players = new List<Player> { player } };
+        var newGame = new Game { Name = name, HostPlayerId = player.Id, Players = new List<Player> { player } };
         _gameRepository.Add(newGame);
         _gameRepository.SaveChanges();
         return newGame;
@@ -64,9 +64,41 @@ public class LobbyService
 
         if (lobby.Players.Count >= lobby.MaxPlayers) return JoinLobbyResult.LobbyFull;
 
+        player.SeatIndex = lobby.Players.Count;
         lobby.Players.Add(player);
 
         _gameRepository.SaveChanges();
         return JoinLobbyResult.Success;
+    }
+
+    public LeaveLobbyResult LeaveLobby(Guid id, Guid playerId)
+    {
+        var lobby = _gameRepository.FindByIdWithPlayers(id);
+        if (lobby == null) return LeaveLobbyResult.LobbyNotFound;
+        if (lobby.Status != GameStatus.Waiting) return LeaveLobbyResult.GameInProgress;
+
+        var player = lobby.Players.FirstOrDefault(p => p.Id == playerId);
+        if (player == null) return LeaveLobbyResult.NotInLobby;
+
+        lobby.Players.Remove(player);
+        player.GameId = null;
+        player.SeatIndex = 0;
+
+        if (lobby.Players.Count == 0)
+        {
+            _gameRepository.Remove(lobby);
+            _gameRepository.SaveChanges();
+            return LeaveLobbyResult.Success;
+        }
+
+        // Keep seat indices contiguous so StartGame's seat-based dealing stays valid
+        var reseated = lobby.Players.OrderBy(p => p.SeatIndex).ToList();
+        for (int i = 0; i < reseated.Count; i++) reseated[i].SeatIndex = i;
+
+        // If the host left, hand off to the new first seat
+        if (lobby.HostPlayerId == playerId) lobby.HostPlayerId = reseated[0].Id;
+
+        _gameRepository.SaveChanges();
+        return LeaveLobbyResult.Success;
     }
 }

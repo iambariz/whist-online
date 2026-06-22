@@ -30,7 +30,7 @@ public class FullGameCycleTests
         var p0 = new Player { Id = Guid.NewGuid(), Name = "Alice", SeatIndex = 0 };
         var p1 = new Player { Id = Guid.NewGuid(), Name = "Bob",   SeatIndex = 1 };
         var p2 = new Player { Id = Guid.NewGuid(), Name = "Carol", SeatIndex = 2 };
-        var game = new Game { Players = [p0, p1, p2] };
+        var game = new Game { HostPlayerId = p0.Id, Players = [p0, p1, p2] };
         db.Games.Add(game);
         db.SaveChanges();
         return (game, p0, p1, p2);

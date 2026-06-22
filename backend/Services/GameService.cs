@@ -63,6 +63,7 @@ public class GameService
         return new GameStateDto
         {
             GameId = game.Id,
+            HostPlayerId = game.HostPlayerId,
             Status = game.Status.ToString(),
             CurrentRound = game.CurrentRound,
             TotalRounds = game.TotalRounds,
@@ -117,7 +118,7 @@ public class GameService
 
     private bool ValidateGameStart(Game game, Guid playerId)
     {
-        return game.Players.Any(p => p.Id == playerId) &&
+        return game.HostPlayerId == playerId &&
                game.Players.Count >= MinPlayers &&
                game.Players.Count <= MaxPlayers;
     }

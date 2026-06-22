@@ -201,4 +201,82 @@ public class LobbyServiceTests
 
         Assert.Equal(JoinLobbyResult.LobbyNotFound, result);
     }
+
+    // LeaveLobby tests
+
+    [Fact]
+    public void LeaveLobby_ReturnsNotInLobby_WhenPlayerNotMember()
+    {
+        var db = CreateDb();
+        var game = new Game { Status = GameStatus.Waiting };
+        db.Games.Add(game);
+        db.SaveChanges();
+
+        var result = CreateService(db).LeaveLobby(game.Id, Guid.NewGuid());
+
+        Assert.Equal(LeaveLobbyResult.NotInLobby, result);
+    }
+
+    [Fact]
+    public void LeaveLobby_ReturnsLobbyNotFound_WhenGameMissing()
+    {
+        var db = CreateDb();
+
+        var result = CreateService(db).LeaveLobby(Guid.NewGuid(), Guid.NewGuid());
+
+        Assert.Equal(LeaveLobbyResult.LobbyNotFound, result);
+    }
+
+    [Fact]
+    public void LeaveLobby_ReturnsGameInProgress_WhenNotWaiting()
+    {
+        var db = CreateDb();
+        var player = new Player { Name = "Bob" };
+        var game = new Game { Status = GameStatus.Playing, Players = new List<Player> { player } };
+        db.Games.Add(game);
+        db.SaveChanges();
+
+        var result = CreateService(db).LeaveLobby(game.Id, player.Id);
+
+        Assert.Equal(LeaveLobbyResult.GameInProgress, result);
+    }
+
+    [Fact]
+    public void LeaveLobby_RemovesPlayer_AndDeletesEmptyLobby()
+    {
+        var db = CreateDb();
+        var player = new Player { Name = "Alice" };
+        db.Players.Add(player);
+        db.SaveChanges();
+
+        var service = CreateService(db);
+        var game = service.CreateGameForPlayer(player);
+
+        var result = service.LeaveLobby(game.Id, player.Id);
+
+        Assert.Equal(LeaveLobbyResult.Success, result);
+        Assert.Null(db.Games.Find(game.Id));
+    }
+
+    [Fact]
+    public void LeaveLobby_ReassignsHost_AndRepacksSeats_WhenHostLeaves()
+    {
+        var db = CreateDb();
+        var host = new Player { Name = "Alice" };
+        var other = new Player { Name = "Bob" };
+        db.Players.AddRange(host, other);
+        db.SaveChanges();
+
+        var service = CreateService(db);
+        var game = service.CreateGameForPlayer(host);
+        service.JoinLobby(game.Id, other.Id);
+
+        var result = service.LeaveLobby(game.Id, host.Id);
+
+        Assert.Equal(LeaveLobbyResult.Success, result);
+        var remaining = db.Games.Find(game.Id)!;
+        Assert.Single(remaining.Players);
+        Assert.Equal(other.Id, remaining.HostPlayerId);
+        Assert.Equal(0, db.Players.Find(other.Id)!.SeatIndex);
+    }
 }

@@ -69,4 +69,23 @@ public class LobbyController : BaseController
             _ => ApiError(500, "Something went wrong")
         };
     }
+
+    [Authorize]
+    [HttpPost("{id:guid}/leave")]
+    public IActionResult LeaveLobby(Guid id)
+    {
+        var player = GetCurrentPlayer();
+        if (player == null) return ApiError(400, "Could not identify player");
+
+        var result = _lobbyService.LeaveLobby(id, player.Id);
+
+        return result switch
+        {
+            LeaveLobbyResult.Success => NoContent(),
+            LeaveLobbyResult.LobbyNotFound => ApiError(404, "Lobby not found"),
+            LeaveLobbyResult.NotInLobby => ApiError(409, "You are not in this lobby"),
+            LeaveLobbyResult.GameInProgress => ApiError(400, "Cannot leave a game in progress"),
+            _ => ApiError(500, "Something went wrong")
+        };
+    }
 }

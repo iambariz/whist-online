@@ -4,7 +4,8 @@ namespace WhistOnline.API.DTOs;
 
 public class GameStateDto                                                     
 {
-    public Guid GameId { get; set; }                                          
+    public Guid GameId { get; set; }
+    public Guid? HostPlayerId { get; set; }
     public string? Status { get; set; }
     public int CurrentRound { get; set; }
     public int TotalRounds { get; set; }                                      

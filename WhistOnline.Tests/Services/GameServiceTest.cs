@@ -28,6 +28,8 @@ public class GameServiceTests
         var game = new Game { Players = players };
         db.Games.Add(game);
         db.SaveChanges();
+        game.HostPlayerId = players[0].Id;
+        db.SaveChanges();
         return game;
     }
 

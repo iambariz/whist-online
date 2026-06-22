@@ -48,12 +48,15 @@ export interface PlayerSummary {
 
 export interface GameState {
   gameId: string;
+  hostPlayerId: string | null;
   status: GameStatus;
   currentRound: number;
   totalRounds: number;
   trumpSuit: Suit | null;
   currentPlayerIndex: number;
   dealerIndex: number;
+  minPlayers: number;
+  maxPlayers: number;
   players: PlayerSummary[];
   myHand: Card[];
 }

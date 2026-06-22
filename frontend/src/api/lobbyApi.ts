@@ -6,11 +6,6 @@ export const getLobbies = async (): Promise<Lobby[]> => {
   return res.data;
 };
 
-export const getLobby = async (lobbyId: string): Promise<Lobby> => {
-  const res = await client.get(`/lobbies/${lobbyId}`);
-  return res.data;
-};
-
 export const createLobby = async (): Promise<Lobby> => {
   const res = await client.post("/lobbies", {});
   return res.data;
@@ -19,4 +14,8 @@ export const createLobby = async (): Promise<Lobby> => {
 export const joinLobby = async (lobbyId: string): Promise<GameState> => {
   const res = await client.post(`/lobbies/${lobbyId}/join`, {});
   return res.data;
+};
+
+export const leaveLobby = async (lobbyId: string): Promise<void> => {
+  await client.post(`/lobbies/${lobbyId}/leave`, {});
 };
