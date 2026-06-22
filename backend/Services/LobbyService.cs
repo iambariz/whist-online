@@ -17,7 +17,7 @@ public class LobbyService
 
     public Game? FindLobbyById(Guid id)
     {
-        return _gameRepository.FindById(id);
+        return _gameRepository.FindByIdWithPlayers(id);
     }
 
     public List<Game> FindOpenLobbies()

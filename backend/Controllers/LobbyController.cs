@@ -25,6 +25,14 @@ public class LobbyController : BaseController
         return Ok(lobbies);
     }
 
+    [HttpGet("{id:guid}")]
+    public IActionResult GetLobby(Guid id)
+    {
+        var lobby = _lobbyService.FindLobbyById(id);
+        if (lobby == null) return ApiError(404, "Lobby not found");
+        return Ok(lobby);
+    }
+
     [Authorize]
     [HttpPost]
     public IActionResult Create([FromBody] CreateLobbyRequest request)
