@@ -6,6 +6,14 @@ export const GameStatus = {
   Finished: "Finished",
 } as const;
 
+export const TrumpSuits = {
+  Clubs: "Clubs",
+  Diamonds: "Diamonds",
+  Hearts: "Hearts",
+  Spades: "Spades",
+};
+
+export type TrumpSuit = (typeof TrumpSuits)[keyof typeof TrumpSuits];
 export type GameStatus = (typeof GameStatus)[keyof typeof GameStatus];
 
 export interface Card {
@@ -26,7 +34,7 @@ export interface GameState {
   status: GameStatus;
   currentRound: number;
   totalRounds: number;
-  trumpSuit: "Clubs" | "Diamonds" | "Hearts" | "Spades" | null;
+  trumpSuit: TrumpSuit | null;
   currentPlayerIndex: number;
   dealerIndex: number;
   players: PlayerSummary[];
