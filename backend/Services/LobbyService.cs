@@ -64,7 +64,9 @@ public class LobbyService
 
         if (lobby.Players.Count >= lobby.MaxPlayers) return JoinLobbyResult.LobbyFull;
 
-        player.SeatIndex = lobby.Players.Count;
+        // Pick the lowest free seat so indices stay unique even after leaves/rejoins
+        player.SeatIndex = Enumerable.Range(0, lobby.MaxPlayers)
+            .First(i => lobby.Players.All(p => p.SeatIndex != i));
         lobby.Players.Add(player);
 
         _gameRepository.SaveChanges();

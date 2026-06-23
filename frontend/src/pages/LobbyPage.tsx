@@ -64,7 +64,7 @@ const LobbyPage = () => {
       <div className="w-full max-w-lg">
         <h3 className="text-left text-lg font-medium mb-2">Players</h3>
         <div className="flex flex-col gap-2">
-          {sortedPlayers.map((player) => (
+          {sortedPlayers.map((player, index) => (
             <div
               key={player.id}
               className="flex justify-between items-center border rounded px-4 py-3"
@@ -79,7 +79,7 @@ const LobbyPage = () => {
                 )}
               </span>
               <span className="text-gray-400 text-sm">
-                Seat {player.seatIndex}
+                Seat {index + 1}
               </span>
             </div>
           ))}
