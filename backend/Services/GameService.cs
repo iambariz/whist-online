@@ -32,6 +32,13 @@ public class GameService
         return game;
     }
 
+    public bool PlayerBelongsToGame(Guid gameId, Guid playerId)
+    {
+        var game = _gameRepository.FindByIdWithPlayers(gameId);
+        if (game == null) return false;
+        return IsPlayerInGame(game, playerId);
+    }
+    
     private void InitGame(Game game)
     {
         var trimmedDeckSize = _deckService.TrimDeck(_deckService.BuildDeck(), game.Players.Count).Count;

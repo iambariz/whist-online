@@ -18,7 +18,15 @@ public class GameHub : Hub
     }
 
     [Authorize]
-    public async Task JoinGame(Guid gameId)
+    public async Task SubscribeToGame(Guid gameId)
     {
+        var player = _playerService.GetPlayerFromToken(Context.User!);
+        if (player == null) throw new HubException("Could not identify player");
+        
+        if (!_gameService.PlayerBelongsToGame(gameId, player.Id)) throw new HubException("Not a member of this game");
+              
+        await Groups.AddToGroupAsync(Context.ConnectionId, GroupName(gameId));
     }
+    
+    private static string GroupName(Guid gameId) => $"game-{gameId}";
 }
