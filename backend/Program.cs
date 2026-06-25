@@ -4,7 +4,9 @@ using WhistOnline.API.Actions;
 using WhistOnline.API.Repositories;
 using WhistOnline.API.Services;
 using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using WhistOnline.API.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,6 +49,22 @@ builder.Services.AddAuthentication("Bearer")
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
         };
+        
+        options.Events = new JwtBearerEvents()
+        {
+            OnMessageReceived = context =>
+            {
+                var token = context.Request.Query["access_token"];
+                var requestPath = context.HttpContext.Request.Path;
+
+                if (!string.IsNullOrEmpty(token) && requestPath.StartsWithSegments("/hubs"))
+                {
+                    context.Token = token;
+                }
+
+                return Task.CompletedTask;
+            }
+        };
     });
 
 
@@ -73,4 +91,5 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<GameHub>("/hubs/game");
 app.Run();
