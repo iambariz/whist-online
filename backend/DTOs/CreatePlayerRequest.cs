@@ -1,6 +1,6 @@
 namespace WhistOnline.API.DTOs;
 
-public class 
+public class
     CreatePlayerRequest
 {
     public required string Name { get; set; }

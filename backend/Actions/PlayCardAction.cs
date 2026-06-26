@@ -41,34 +41,34 @@ public class PlayCardAction : RoundAction
         player.Hand.Remove(card);
     }
 
-     protected override void AfterAction(Game game)                                                                                                                                                                                                                                                                      
-      {                                                                                                                                                                                                                                                                                                                   
-          if (!IsTrickComplete(game)) return;                                                                                                                                                                                                                                                                             
-          _trickService.EvaluateTrick(game, game.Rounds.Last().Tricks.Last());                                                                                                                                                                                                                                            
-       
-          if (!IsRoundComplete(game))
-          {
-              CreateTrickForRound(game.Rounds.Last());
-              return;
-          }
-          _scoringService.EvaluateRound(game);
-          _gameService.AdvanceRound(game);
-      }
+    protected override void AfterAction(Game game)
+    {
+        if (!IsTrickComplete(game)) return;
+        _trickService.EvaluateTrick(game, game.Rounds.Last().Tricks.Last());
 
-      private void CreateTrickForRound(Round currentRound)
-      {
-          currentRound.Tricks.Add(new Trick
-          {
-              TrickNumber = currentRound.Tricks.Count + 1,
-              RoundId = currentRound.Id
-          });
-      }
-                                                                
-      private bool IsTrickComplete(Game game) =>
-          game.Rounds.Last().Tricks.Last().CardsPlayed.Count == game.Players.Count;
-                                                                                                                                                                                                                                                                                                                          
-      private bool IsRoundComplete(Game game) =>
-          game.Players.All(p => p.Hand.Count == 0);     
+        if (!IsRoundComplete(game))
+        {
+            CreateTrickForRound(game.Rounds.Last());
+            return;
+        }
+        _scoringService.EvaluateRound(game);
+        _gameService.AdvanceRound(game);
+    }
+
+    private void CreateTrickForRound(Round currentRound)
+    {
+        currentRound.Tricks.Add(new Trick
+        {
+            TrickNumber = currentRound.Tricks.Count + 1,
+            RoundId = currentRound.Id
+        });
+    }
+
+    private bool IsTrickComplete(Game game) =>
+        game.Rounds.Last().Tricks.Last().CardsPlayed.Count == game.Players.Count;
+
+    private bool IsRoundComplete(Game game) =>
+        game.Players.All(p => p.Hand.Count == 0);
 
     private bool PlayerHasCard(Player player)
     {

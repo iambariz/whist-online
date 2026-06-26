@@ -1,4 +1,4 @@
-﻿namespace WhistOnline.Tests;
+namespace WhistOnline.Tests;
 
 public class UnitTest1
 {

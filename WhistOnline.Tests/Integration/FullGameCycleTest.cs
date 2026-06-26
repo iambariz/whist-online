@@ -28,7 +28,7 @@ public class FullGameCycleTests
     private (Game game, Player p0, Player p1, Player p2) SetupGame(AppDbContext db)
     {
         var p0 = new Player { Id = Guid.NewGuid(), Name = "Alice", SeatIndex = 0 };
-        var p1 = new Player { Id = Guid.NewGuid(), Name = "Bob",   SeatIndex = 1 };
+        var p1 = new Player { Id = Guid.NewGuid(), Name = "Bob", SeatIndex = 1 };
         var p2 = new Player { Id = Guid.NewGuid(), Name = "Carol", SeatIndex = 2 };
         var game = new Game { HostPlayerId = p0.Id, Players = [p0, p1, p2] };
         db.Games.Add(game);
@@ -145,8 +145,8 @@ public class FullGameCycleTests
         Assert.Equal(GameStatus.Playing, game.Status);
 
         // Trick 1: p2 leads Hearts Ace (all must follow Hearts)
-        Assert.True(Play(game, p2, Suit.Hearts, Rank.Ace,   db, gs));
-        Assert.True(Play(game, p0, Suit.Hearts, Rank.King,  db, gs));
+        Assert.True(Play(game, p2, Suit.Hearts, Rank.Ace, db, gs));
+        Assert.True(Play(game, p0, Suit.Hearts, Rank.King, db, gs));
         Assert.True(Play(game, p1, Suit.Hearts, Rank.Queen, db, gs));
 
         var round2 = game.Rounds.Last();
@@ -155,8 +155,8 @@ public class FullGameCycleTests
 
         // Trick 2: p2 leads Clubs King (all must follow Clubs)
         Assert.True(Play(game, p2, Suit.Clubs, Rank.King, db, gs));
-        Assert.True(Play(game, p0, Suit.Clubs, Rank.Two,  db, gs));
-        Assert.True(Play(game, p1, Suit.Clubs, Rank.Ace,  db, gs));
+        Assert.True(Play(game, p0, Suit.Clubs, Rank.Two, db, gs));
+        Assert.True(Play(game, p1, Suit.Clubs, Rank.Ace, db, gs));
 
         Assert.Equal(p1.Id, round2.Tricks[1].WinnerPlayerId);
 
@@ -164,7 +164,7 @@ public class FullGameCycleTests
         // p0: round1=-1, round2 hit(0=0)=+10 → total=9
         // p1: round1=+11, round2 miss(0≠1)=-1 → total=10
         // p2: round1=+10, round2 hit(1=1)=+11 → total=21
-        Assert.Equal(9,  p0.Score);
+        Assert.Equal(9, p0.Score);
         Assert.Equal(10, p1.Score);
         Assert.Equal(21, p2.Score);
 
@@ -193,9 +193,9 @@ public class FullGameCycleTests
         Bid(game, p1, 1, db);
         Bid(game, p2, 0, db);
         Bid(game, p0, 1, db);
-        Play(game, p1, Suit.Clubs, Rank.Ace,   db, gs);
-        Play(game, p2, Suit.Hearts, Rank.King,  db, gs);
-        Play(game, p0, Suit.Hearts, Rank.Two,   db, gs);
+        Play(game, p1, Suit.Clubs, Rank.Ace, db, gs);
+        Play(game, p2, Suit.Hearts, Rank.King, db, gs);
+        Play(game, p0, Suit.Hearts, Rank.Two, db, gs);
 
         Assert.Equal(GameStatus.Finished, game.Status);
     }
@@ -218,9 +218,9 @@ public class FullGameCycleTests
         Bid(game, p1, 1, db);
         Bid(game, p2, 0, db);
         Bid(game, p0, 1, db);
-        Play(game, p1, Suit.Hearts, Rank.King,    db, gs);
-        Play(game, p2, Suit.Diamonds, Rank.Ace,   db, gs);
-        Play(game, p0, Suit.Hearts, Rank.Two,     db, gs);
+        Play(game, p1, Suit.Hearts, Rank.King, db, gs);
+        Play(game, p2, Suit.Diamonds, Rank.Ace, db, gs);
+        Play(game, p0, Suit.Hearts, Rank.Two, db, gs);
 
         var trick = game.Rounds.First().Tricks.First();
         Assert.Equal(p1.Id, trick.WinnerPlayerId); // Hearts King wins, no trump
@@ -243,9 +243,9 @@ public class FullGameCycleTests
         Bid(game, p1, 1, db);
         Bid(game, p2, 0, db);
         Bid(game, p0, 1, db);
-        Play(game, p1, Suit.Clubs,  Rank.Ace,  db, gs);
+        Play(game, p1, Suit.Clubs, Rank.Ace, db, gs);
         Play(game, p2, Suit.Hearts, Rank.King, db, gs);
-        Play(game, p0, Suit.Hearts, Rank.Two,  db, gs);
+        Play(game, p0, Suit.Hearts, Rank.Two, db, gs);
 
         // Round 2: override hands, p1 wins trick 1
         p2.Hand = [new Card { Suit = Suit.Hearts, Rank = Rank.Two }, new Card { Suit = Suit.Clubs, Rank = Rank.Two }];
@@ -257,9 +257,9 @@ public class FullGameCycleTests
         Bid(game, p1, 0, db); // dealer p1 can't bid 1 (0+0+1=1≠2), bids 0
 
         // Trick 1: p2 leads Hearts (p2 is CurrentPlayerIndex=2 after round 1)
-        Play(game, p2, Suit.Hearts, Rank.Two,   db, gs);
+        Play(game, p2, Suit.Hearts, Rank.Two, db, gs);
         Play(game, p0, Suit.Hearts, Rank.Three, db, gs);
-        Play(game, p1, Suit.Hearts, Rank.Ace,   db, gs); // p1 wins
+        Play(game, p1, Suit.Hearts, Rank.Ace, db, gs); // p1 wins
 
         var round2 = game.Rounds.Last();
         Assert.Equal(p1.Id, round2.Tricks[0].WinnerPlayerId);
@@ -287,7 +287,7 @@ public class FullGameCycleTests
         game.TotalRounds = 5;
 
         // ── Round 1: Trump=Clubs, 1 card, dealer=p0, p1 leads bidding ──────────
-        p1.Hand = [new Card { Suit = Suit.Clubs,  Rank = Rank.Ace }];
+        p1.Hand = [new Card { Suit = Suit.Clubs, Rank = Rank.Ace }];
         p2.Hand = [new Card { Suit = Suit.Hearts, Rank = Rank.King }];
         p0.Hand = [new Card { Suit = Suit.Hearts, Rank = Rank.Two }];
 
@@ -304,9 +304,9 @@ public class FullGameCycleTests
         Assert.Equal(Suit.Diamonds, game.TrumpSuit);
 
         // ── Round 2: Trump=Diamonds, 2 cards, dealer=p1, p2 leads bidding ──────
-        p2.Hand = [new Card { Suit = Suit.Diamonds, Rank = Rank.Ace  }, new Card { Suit = Suit.Diamonds, Rank = Rank.King }];
-        p0.Hand = [new Card { Suit = Suit.Hearts,   Rank = Rank.Ace  }, new Card { Suit = Suit.Hearts,   Rank = Rank.King }];
-        p1.Hand = [new Card { Suit = Suit.Spades,   Rank = Rank.Ace  }, new Card { Suit = Suit.Spades,   Rank = Rank.King }];
+        p2.Hand = [new Card { Suit = Suit.Diamonds, Rank = Rank.Ace }, new Card { Suit = Suit.Diamonds, Rank = Rank.King }];
+        p0.Hand = [new Card { Suit = Suit.Hearts, Rank = Rank.Ace }, new Card { Suit = Suit.Hearts, Rank = Rank.King }];
+        p1.Hand = [new Card { Suit = Suit.Spades, Rank = Rank.Ace }, new Card { Suit = Suit.Spades, Rank = Rank.King }];
 
         // p1 (dealer) can't bid 0 (2+0+0=2=cardsDealt), bids 1
         BidRound(game, [(p2, 2), (p0, 0), (p1, 1)], db);
@@ -323,9 +323,9 @@ public class FullGameCycleTests
         Assert.Equal(Suit.Hearts, game.TrumpSuit);
 
         // ── Round 3: Trump=Hearts, 3 cards, dealer=p2, p0 leads bidding ─────────
-        p0.Hand = [new Card { Suit = Suit.Hearts, Rank = Rank.Ace   }, new Card { Suit = Suit.Hearts, Rank = Rank.King  }, new Card { Suit = Suit.Hearts, Rank = Rank.Queen }];
-        p1.Hand = [new Card { Suit = Suit.Clubs,  Rank = Rank.Ace   }, new Card { Suit = Suit.Clubs,  Rank = Rank.King  }, new Card { Suit = Suit.Clubs,  Rank = Rank.Queen }];
-        p2.Hand = [new Card { Suit = Suit.Spades, Rank = Rank.Ace   }, new Card { Suit = Suit.Spades, Rank = Rank.King  }, new Card { Suit = Suit.Spades, Rank = Rank.Queen }];
+        p0.Hand = [new Card { Suit = Suit.Hearts, Rank = Rank.Ace }, new Card { Suit = Suit.Hearts, Rank = Rank.King }, new Card { Suit = Suit.Hearts, Rank = Rank.Queen }];
+        p1.Hand = [new Card { Suit = Suit.Clubs, Rank = Rank.Ace }, new Card { Suit = Suit.Clubs, Rank = Rank.King }, new Card { Suit = Suit.Clubs, Rank = Rank.Queen }];
+        p2.Hand = [new Card { Suit = Suit.Spades, Rank = Rank.Ace }, new Card { Suit = Suit.Spades, Rank = Rank.King }, new Card { Suit = Suit.Spades, Rank = Rank.Queen }];
 
         // p2 (dealer) can't bid 0 (3+0+0=3=cardsDealt), bids 1
         BidRound(game, [(p0, 3), (p1, 0), (p2, 1)], db);
@@ -342,9 +342,9 @@ public class FullGameCycleTests
         Assert.Equal(Suit.Spades, game.TrumpSuit);
 
         // ── Round 4: Trump=Spades, 4 cards, dealer=p0, p1 leads bidding ─────────
-        p1.Hand = [new Card { Suit = Suit.Spades, Rank = Rank.Ace   }, new Card { Suit = Suit.Spades, Rank = Rank.King  }, new Card { Suit = Suit.Spades, Rank = Rank.Queen }, new Card { Suit = Suit.Spades, Rank = Rank.Jack }];
-        p2.Hand = [new Card { Suit = Suit.Clubs,  Rank = Rank.Ace   }, new Card { Suit = Suit.Clubs,  Rank = Rank.King  }, new Card { Suit = Suit.Clubs,  Rank = Rank.Queen }, new Card { Suit = Suit.Clubs,  Rank = Rank.Jack }];
-        p0.Hand = [new Card { Suit = Suit.Hearts, Rank = Rank.Ace   }, new Card { Suit = Suit.Hearts, Rank = Rank.King  }, new Card { Suit = Suit.Hearts, Rank = Rank.Queen }, new Card { Suit = Suit.Hearts, Rank = Rank.Jack }];
+        p1.Hand = [new Card { Suit = Suit.Spades, Rank = Rank.Ace }, new Card { Suit = Suit.Spades, Rank = Rank.King }, new Card { Suit = Suit.Spades, Rank = Rank.Queen }, new Card { Suit = Suit.Spades, Rank = Rank.Jack }];
+        p2.Hand = [new Card { Suit = Suit.Clubs, Rank = Rank.Ace }, new Card { Suit = Suit.Clubs, Rank = Rank.King }, new Card { Suit = Suit.Clubs, Rank = Rank.Queen }, new Card { Suit = Suit.Clubs, Rank = Rank.Jack }];
+        p0.Hand = [new Card { Suit = Suit.Hearts, Rank = Rank.Ace }, new Card { Suit = Suit.Hearts, Rank = Rank.King }, new Card { Suit = Suit.Hearts, Rank = Rank.Queen }, new Card { Suit = Suit.Hearts, Rank = Rank.Jack }];
 
         // p0 (dealer) can't bid 0 (4+0+0=4=cardsDealt), bids 1
         BidRound(game, [(p1, 4), (p2, 0), (p0, 1)], db);
@@ -363,9 +363,9 @@ public class FullGameCycleTests
 
         // ── Round 5: No Trump, 5 cards, dealer=p1, p2 leads bidding ─────────────
         // p2 sweeps all 5 tricks with highest Hearts each time (no trump, p0 must follow, p1 sluffs)
-        p2.Hand = [new Card { Suit = Suit.Hearts, Rank = Rank.Ace }, new Card { Suit = Suit.Hearts, Rank = Rank.King  }, new Card { Suit = Suit.Hearts, Rank = Rank.Queen }, new Card { Suit = Suit.Hearts, Rank = Rank.Jack }, new Card { Suit = Suit.Hearts, Rank = Rank.Ten }];
-        p0.Hand = [new Card { Suit = Suit.Hearts, Rank = Rank.Two }, new Card { Suit = Suit.Hearts, Rank = Rank.Three }, new Card { Suit = Suit.Hearts, Rank = Rank.Four  }, new Card { Suit = Suit.Hearts, Rank = Rank.Five }, new Card { Suit = Suit.Hearts, Rank = Rank.Six }];
-        p1.Hand = [new Card { Suit = Suit.Spades, Rank = Rank.Ace }, new Card { Suit = Suit.Spades, Rank = Rank.King  }, new Card { Suit = Suit.Spades, Rank = Rank.Queen }, new Card { Suit = Suit.Spades, Rank = Rank.Jack }, new Card { Suit = Suit.Spades, Rank = Rank.Ten }];
+        p2.Hand = [new Card { Suit = Suit.Hearts, Rank = Rank.Ace }, new Card { Suit = Suit.Hearts, Rank = Rank.King }, new Card { Suit = Suit.Hearts, Rank = Rank.Queen }, new Card { Suit = Suit.Hearts, Rank = Rank.Jack }, new Card { Suit = Suit.Hearts, Rank = Rank.Ten }];
+        p0.Hand = [new Card { Suit = Suit.Hearts, Rank = Rank.Two }, new Card { Suit = Suit.Hearts, Rank = Rank.Three }, new Card { Suit = Suit.Hearts, Rank = Rank.Four }, new Card { Suit = Suit.Hearts, Rank = Rank.Five }, new Card { Suit = Suit.Hearts, Rank = Rank.Six }];
+        p1.Hand = [new Card { Suit = Suit.Spades, Rank = Rank.Ace }, new Card { Suit = Suit.Spades, Rank = Rank.King }, new Card { Suit = Suit.Spades, Rank = Rank.Queen }, new Card { Suit = Suit.Spades, Rank = Rank.Jack }, new Card { Suit = Suit.Spades, Rank = Rank.Ten }];
 
         // p1 (dealer) can't bid 0 (5+0+0=5=cardsDealt), bids 1
         BidRound(game, [(p2, 5), (p0, 0), (p1, 1)], db);

@@ -16,7 +16,7 @@ public class PlayerController : BaseController
     {
         _tokenService = tokenService;
     }
-    
+
     [Authorize]
     [HttpGet("me")]
     public IActionResult GetMe()
@@ -31,7 +31,7 @@ public class PlayerController : BaseController
         var player = _playerService.FindPlayerByGuid(id);
         return player != null ? Ok(player) : NotFound();
     }
-    
+
     [HttpPost]
     public IActionResult AddPlayer([FromBody] CreatePlayerRequest player)
     {

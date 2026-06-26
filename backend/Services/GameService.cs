@@ -38,7 +38,7 @@ public class GameService
         if (game == null) return false;
         return IsPlayerInGame(game, playerId);
     }
-    
+
     private void InitGame(Game game)
     {
         var trimmedDeckSize = _deckService.TrimDeck(_deckService.BuildDeck(), game.Players.Count).Count;
@@ -103,7 +103,7 @@ public class GameService
             RotateTrumpSuit(game);
             game.DealerIndex = (game.DealerIndex + 1) % game.Players.Count;
             game.CurrentPlayerIndex = (game.DealerIndex + 1) % game.Players.Count;
-            
+
             SetupRound(game, game.CurrentRound);
             game.Status = GameStatus.Bidding;
         }
@@ -121,7 +121,7 @@ public class GameService
         game.TrumpSuit = currentIndex == suits.Length - 1
             ? null
             : suits[currentIndex + 1];
-    }                                                                                                                                                                                                                                                                                                                   
+    }
 
     private bool ValidateGameStart(Game game, Guid playerId)
     {

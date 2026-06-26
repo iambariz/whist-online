@@ -24,7 +24,7 @@ public class ScoreBoardServiceTests
 
         Assert.Equal(20, result[0].Score);
         Assert.Equal(10, result[1].Score);
-        Assert.Equal(5,  result[2].Score);
+        Assert.Equal(5, result[2].Score);
     }
 
     [Fact]

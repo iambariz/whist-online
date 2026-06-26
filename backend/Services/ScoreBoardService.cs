@@ -9,7 +9,7 @@ public class ScoreBoardService
     {
         return game.Players
             .OrderByDescending(p => p.Score)
-            .Select(p => new ScoreboardEntryDto { Name = p.Name, Score  = p.Score, SeatIndex = p.SeatIndex })
+            .Select(p => new ScoreboardEntryDto { Name = p.Name, Score = p.Score, SeatIndex = p.SeatIndex })
             .ToList();
     }
 }

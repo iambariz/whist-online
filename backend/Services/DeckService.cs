@@ -32,14 +32,14 @@ public class DeckService
         return hands;
     }
 
-    public List<Card> TrimDeck(List<Card> deck, int playerCount)                                                                                                                          
-    {                                      
-        while (deck.Count % playerCount != 0)                                                                                                                                             
+    public List<Card> TrimDeck(List<Card> deck, int playerCount)
+    {
+        while (deck.Count % playerCount != 0)
         {
-            var lowestRank = deck.Min(c => c.Rank);                                                                                                                                       
-            deck.RemoveAll(c => c.Rank == lowestRank);                                                                                                                                    
+            var lowestRank = deck.Min(c => c.Rank);
+            deck.RemoveAll(c => c.Rank == lowestRank);
         }
-        return deck;                                                                                                                                                                      
-    }   
-    
+        return deck;
+    }
+
 }

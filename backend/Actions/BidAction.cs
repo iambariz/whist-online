@@ -51,10 +51,10 @@ public class BidAction : RoundAction
         var currentRound = GetCurrentRound(game)!;
         if (currentRound.Bids.Count < game.Players.Count) return;
         game.Status = GameStatus.Playing;
-        currentRound.Tricks.Add(new Trick                                                                                                  
-        {                                                                                                                                  
-            TrickNumber = currentRound.Tricks.Count + 1,                                                                                   
-            RoundId = currentRound.Id                             
+        currentRound.Tricks.Add(new Trick
+        {
+            TrickNumber = currentRound.Tricks.Count + 1,
+            RoundId = currentRound.Id
         });
     }
 

@@ -1,15 +1,14 @@
 using WhistOnline.API.Models;
-using Microsoft.Extensions.Configuration;                                     
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;                                                 
-using System.Text;           
-using Microsoft.IdentityModel.Tokens;                                         
+using System.Security.Claims;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
 
 namespace WhistOnline.API.Services;
 
 public class TokenService
 {
-    private readonly IConfiguration _config;                                      
+    private readonly IConfiguration _config;
     public TokenService(IConfiguration config)
     {
         _config = config;

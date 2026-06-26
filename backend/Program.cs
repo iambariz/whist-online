@@ -49,7 +49,7 @@ builder.Services.AddAuthentication("Bearer")
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
         };
-        
+
         options.Events = new JwtBearerEvents()
         {
             OnMessageReceived = context =>
@@ -71,10 +71,10 @@ builder.Services.AddAuthentication("Bearer")
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
-    {                                                                                                                              
+    {
         policy.WithOrigins("http://localhost:5173")
-            .AllowAnyHeader()                                                                                                    
-            .AllowAnyMethod();                                                                                                   
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 

@@ -25,11 +25,11 @@ public class GameRepository
 
     public Game? FindByIdWithRoundsAndTricks(Guid id)
     {
-        return _db.Games                                                                                                                                                                                                                                                                                                
-            .Include(g => g.Players)                                                                                                                                                                                                                                                                                    
-            .Include(g => g.Rounds)                                                                                                                                                                                                                                                                                     
+        return _db.Games
+            .Include(g => g.Players)
+            .Include(g => g.Rounds)
             .ThenInclude(r => r.Tricks)
-            .ThenInclude(t => t.CardsPlayed)                                                                                                                                                                                                                                                                    
+            .ThenInclude(t => t.CardsPlayed)
             .FirstOrDefault(g => g.Id == id);
     }
 

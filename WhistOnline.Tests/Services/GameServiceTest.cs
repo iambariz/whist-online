@@ -105,7 +105,7 @@ public class GameServiceTests
         var result = service.StartGame(game.Id, game.Players[0].Id);
 
         Assert.NotNull(result);
-        Assert.All(result.Players, p => Assert.Equal(1, p.Hand.Count));
+        Assert.All(result.Players, p => Assert.Single(p.Hand));
     }
 
     [Fact]
@@ -189,7 +189,7 @@ public class GameServiceTests
 
         Assert.NotNull(result);
         Assert.NotNull(result.MyHand);
-        Assert.Equal(1, result.MyHand!.Count);
+        Assert.Single(result.MyHand!);
     }
 
     [Fact]

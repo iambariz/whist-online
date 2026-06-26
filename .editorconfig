@@ -1,0 +1,58 @@
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+end_of_line = lf
+
+[*.{json,yml,yaml,js,ts,tsx,css,html}]
+indent_size = 2
+
+[*.cs]
+# Namespaces
+csharp_style_namespace_declarations = file_scoped:warning
+
+# 'this.' qualification — discouraged
+dotnet_style_qualification_for_field = false:warning
+dotnet_style_qualification_for_property = false:warning
+dotnet_style_qualification_for_method = false:warning
+dotnet_style_qualification_for_event = false:warning
+
+# var usage
+csharp_style_var_for_built_in_types = false:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = false:suggestion
+
+# Modern language features
+csharp_prefer_braces = true:suggestion
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+dotnet_style_prefer_conditional_expression_over_assignment = true:suggestion
+dotnet_style_null_propagation = true:suggestion
+dotnet_style_coalesce_expression = true:suggestion
+
+# Naming: constants = PascalCase (must come before the private-field rule)
+dotnet_naming_rule.constants_pascal.severity = warning
+dotnet_naming_rule.constants_pascal.symbols = constant_fields
+dotnet_naming_rule.constants_pascal.style = pascal_case
+dotnet_naming_symbols.constant_fields.applicable_kinds = field
+dotnet_naming_symbols.constant_fields.required_modifiers = const
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+
+# Naming: private fields = _camelCase
+dotnet_naming_rule.private_fields_underscore.severity = warning
+dotnet_naming_rule.private_fields_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_underscore.style = underscore_prefix
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_style.underscore_prefix.capitalization = camel_case
+dotnet_naming_style.underscore_prefix.required_prefix = _
+
+# Unused usings
+dotnet_diagnostic.IDE0005.severity = warning
+
+# Generated EF migrations — don't format
+[**/Migrations/*.cs]
+generated_code = true
