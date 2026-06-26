@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using WhistOnline.API.Actions;
 using WhistOnline.API.DTOs;
+using WhistOnline.API.Hubs;
 using WhistOnline.API.Repositories;
 using WhistOnline.API.Services;
 
@@ -18,6 +20,7 @@ public class GameController : BaseController
     private readonly TrickService _trickService;
     private readonly ScoringService _scoringService;
     private readonly ScoreBoardService _scoreBoardService;
+    private readonly IHubContext<GameHub> _gameHub;
 
     public GameController(
         GameService gameService,
@@ -27,7 +30,8 @@ public class GameController : BaseController
         GameRules gameRules,
         TrickService trickService,
         ScoringService scoringService,
-        ScoreBoardService scoreBoardService)
+        ScoreBoardService scoreBoardService,
+        IHubContext<GameHub> gameHub)
         : base(playerService)
     {
         _gameService = gameService;
@@ -37,7 +41,11 @@ public class GameController : BaseController
         _trickService = trickService;
         _scoringService = scoringService;
         _scoreBoardService = scoreBoardService;
+        _gameHub = gameHub;
     }
+
+    private Task NotifyGameUpdated(Guid gameId) =>
+        _gameHub.Clients.Group(GameHub.GroupName(gameId)).SendAsync("GameUpdated", gameId);
 
     [Authorize]
     [HttpGet("{id:guid}")]
@@ -53,19 +61,20 @@ public class GameController : BaseController
 
     [Authorize]
     [HttpPost("{id:guid}/start")]
-    public IActionResult StartGame(Guid id)
+    public async Task<IActionResult> StartGame(Guid id)
     {
         var player = GetCurrentPlayer();
         if (player == null) return ApiError(400, "Could not identify player");
 
         if (_gameService.StartGame(id, player.Id) == null) return ApiError(404, "Game not found");
         var gameState = _gameService.GetGameState(id, player.Id);
+        await NotifyGameUpdated(id);
         return Ok(gameState);
     }
 
     [Authorize]
     [HttpPost("{id:guid}/bid")]
-    public IActionResult SubmitBid(Guid id, [FromBody] SubmitBidDto submitBidDto)
+    public async Task<IActionResult> SubmitBid(Guid id, [FromBody] SubmitBidDto submitBidDto)
     {
         var player = GetCurrentPlayer();
         if (player == null) return ApiError(400, "Could not identify player");
@@ -77,12 +86,13 @@ public class GameController : BaseController
         if (!action.Execute(game, player)) return ApiError(400, "Invalid bid");
 
         _gameRepository.SaveChanges();
+        await NotifyGameUpdated(id);
         return Ok(action.Result);
     }
 
     [Authorize]
     [HttpPost("{id:guid}/play")]
-    public IActionResult PlayCard(Guid id, [FromBody] PlayCardDto cardDto)
+    public async Task<IActionResult> PlayCard(Guid id, [FromBody] PlayCardDto cardDto)
     {
         var player = GetCurrentPlayer();
         if (player == null) return ApiError(400, "Could not identify player");
@@ -95,6 +105,7 @@ public class GameController : BaseController
 
         _gameRepository.SaveChanges();
         var gameState = _gameService.GetGameState(id, player.Id);
+        await NotifyGameUpdated(id);
         return Ok(gameState);
     }
 

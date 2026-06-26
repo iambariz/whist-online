@@ -28,5 +28,5 @@ public class GameHub : Hub
         await Groups.AddToGroupAsync(Context.ConnectionId, GroupName(gameId));
     }
     
-    private static string GroupName(Guid gameId) => $"game-{gameId}";
+    public static string GroupName(Guid gameId) => $"game-{gameId}";
 }
