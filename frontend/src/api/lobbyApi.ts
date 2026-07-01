@@ -19,3 +19,8 @@ export const joinLobby = async (lobbyId: string): Promise<GameState> => {
 export const leaveLobby = async (lobbyId: string): Promise<void> => {
   await client.post(`/lobbies/${lobbyId}/leave`, {});
 };
+
+// Dev-only: backend endpoint is gated to the Development environment.
+export const addDummyPlayer = async (lobbyId: string): Promise<void> => {
+  await client.post(`/lobbies/${lobbyId}/add-dummy`, {});
+};

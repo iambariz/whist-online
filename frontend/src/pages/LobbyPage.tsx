@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getGameState, startGame } from "../api/gameApi";
-import { leaveLobby } from "../api/lobbyApi";
+import { leaveLobby, addDummyPlayer } from "../api/lobbyApi";
 import { GameStatus } from "../types/game.types";
 import type { GameState } from "../types/game.types";
 
@@ -44,6 +44,12 @@ const LobbyPage = () => {
     if (!id) return;
     await leaveLobby(id);
     navigate("/");
+  };
+
+  const handleAddDummy = async () => {
+    if (!id) return;
+    await addDummyPlayer(id);
+    await refresh();
   };
 
   if (!game) return <p className="text-center mt-16">Loading lobby…</p>;
@@ -102,6 +108,15 @@ const LobbyPage = () => {
         >
           Leave
         </button>
+        {import.meta.env.DEV && (
+          <button
+            onClick={handleAddDummy}
+            disabled={game.players.length >= game.maxPlayers}
+            className="bg-amber-600 text-white px-6 py-2 rounded hover:bg-amber-700 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            ＋ Add dummy player
+          </button>
+        )}
       </div>
 
       {isHost && !enoughPlayers && (

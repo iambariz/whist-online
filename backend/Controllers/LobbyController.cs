@@ -11,11 +11,13 @@ namespace WhistOnline.API.Controllers;
 public class LobbyController : BaseController
 {
     private readonly LobbyService _lobbyService;
+    private readonly IWebHostEnvironment _env;
 
-    public LobbyController(LobbyService lobbyService, PlayerService playerService)
+    public LobbyController(LobbyService lobbyService, PlayerService playerService, IWebHostEnvironment env)
         : base(playerService)
     {
         _lobbyService = lobbyService;
+        _env = env;
     }
 
     [HttpGet]
@@ -65,6 +67,21 @@ public class LobbyController : BaseController
             JoinLobbyResult.Success => Ok(),
             JoinLobbyResult.LobbyNotFound => ApiError(404, "Lobby not found"),
             JoinLobbyResult.AlreadyInLobby => ApiError(409, "You are already in this lobby"),
+            JoinLobbyResult.LobbyFull => ApiError(400, "Lobby is full"),
+            _ => ApiError(500, "Something went wrong")
+        };
+    }
+
+    [Authorize]
+    [HttpPost("{id:guid}/add-dummy")]
+    public IActionResult AddDummy(Guid id)
+    {
+        if (!_env.IsDevelopment()) return ApiError(404, "Not found");
+
+        return _lobbyService.AddDummyPlayer(id) switch
+        {
+            JoinLobbyResult.Success => Ok(),
+            JoinLobbyResult.LobbyNotFound => ApiError(404, "Lobby not found"),
             JoinLobbyResult.LobbyFull => ApiError(400, "Lobby is full"),
             _ => ApiError(500, "Something went wrong")
         };

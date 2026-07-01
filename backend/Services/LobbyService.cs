@@ -51,6 +51,28 @@ public class LobbyService
         return true;
     }
 
+    // Dev-only helper: seats a throwaway bot so a single dev can reach MinPlayers.
+    public JoinLobbyResult AddDummyPlayer(Guid lobbyId)
+    {
+        var lobby = _gameRepository.FindOpenLobbyByIdWithPlayers(lobbyId);
+        if (lobby == null) return JoinLobbyResult.LobbyNotFound;
+        if (lobby.Players.Count >= lobby.MaxPlayers) return JoinLobbyResult.LobbyFull;
+
+        var faker = new Faker();
+        var dummy = new Player
+        {
+            Name = faker.Name.FirstName() + " (bot)",
+            GameId = lobby.Id,
+            IsConnected = true,
+            SeatIndex = Enumerable.Range(0, lobby.MaxPlayers)
+                .First(i => lobby.Players.All(p => p.SeatIndex != i))
+        };
+        lobby.Players.Add(dummy);
+
+        _gameRepository.SaveChanges();
+        return JoinLobbyResult.Success;
+    }
+
     public JoinLobbyResult JoinLobby(Guid id, Guid playerId)
     {
         var player = _playerRepository.FindByIdTracked(playerId);
