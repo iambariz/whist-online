@@ -35,7 +35,12 @@ builder.Services.AddScoped<ScoringService>();
 builder.Services.AddScoped<GameRules>();
 builder.Services.AddScoped<ScoreBoardService>();
 builder.Services.AddScoped<DeckService>();
-builder.Services.AddSignalR();
+builder.Services.AddSignalR()
+    .AddJsonProtocol(options =>
+    {
+        options.PayloadSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.PayloadSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
     {

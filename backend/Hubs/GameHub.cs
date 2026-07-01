@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using WhistOnline.API.DTOs;
 using WhistOnline.API.Services;
 
 namespace WhistOnline.API.Hubs;
@@ -16,7 +17,7 @@ public class GameHub : Hub
     }
 
     [Authorize]
-    public async Task SubscribeToGame(Guid gameId)
+    public async Task<GameStateDto?> SubscribeToGame(Guid gameId)
     {
         var player = _playerService.GetPlayerFromToken(Context.User!);
         if (player == null) throw new HubException("Could not identify player");
@@ -24,6 +25,8 @@ public class GameHub : Hub
         if (!_gameService.PlayerBelongsToGame(gameId, player.Id)) throw new HubException("Not a member of this game");
 
         await Groups.AddToGroupAsync(Context.ConnectionId, GroupName(gameId));
+
+        return _gameService.GetGameState(gameId, player.Id);
     }
 
     public static string GroupName(Guid gameId) => $"game-{gameId}";
