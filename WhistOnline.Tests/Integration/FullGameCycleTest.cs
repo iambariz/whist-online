@@ -108,7 +108,7 @@ public class FullGameCycleTests
         Assert.Equal(Suit.Diamonds, game.TrumpSuit);
         Assert.Equal(1, game.DealerIndex);
         Assert.Equal(2, game.CurrentPlayerIndex);
-        Assert.All(game.Players, p => Assert.Equal(2, p.Hand.Count));
+        Assert.All(game.Players, p => Assert.Equal(16, p.Hand.Count)); // full hand: 48 / 3
     }
 
     [Fact]
@@ -173,7 +173,7 @@ public class FullGameCycleTests
         Assert.Equal(Suit.Hearts, game.TrumpSuit);
         Assert.Equal(2, game.DealerIndex);
         Assert.Equal(0, game.CurrentPlayerIndex);
-        Assert.All(game.Players, p => Assert.Equal(3, p.Hand.Count));
+        Assert.All(game.Players, p => Assert.Equal(16, p.Hand.Count)); // full hand: 48 / 3
     }
 
     [Fact]

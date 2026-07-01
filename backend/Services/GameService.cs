@@ -25,7 +25,7 @@ public class GameService
         if (!ValidateGameStart(game, playerId)) return null;
 
         InitGame(game);
-        SetupRound(game, 1);
+        SetupRound(game, MaxCardsPerHand(game.Players.Count));
 
         game.Status = GameStatus.Bidding;
         _gameRepository.SaveChanges();
@@ -41,14 +41,16 @@ public class GameService
 
     private void InitGame(Game game)
     {
-        var trimmedDeckSize = _deckService.TrimDeck(_deckService.BuildDeck(), game.Players.Count).Count;
-
-        game.TotalRounds = trimmedDeckSize / game.Players.Count;
+        // One round per trump suit, plus a final no-trump round.
+        game.TotalRounds = Enum.GetValues<Suit>().Length + 1;
         game.CurrentRound = 1;
         game.TrumpSuit = Suit.Clubs;
         game.DealerIndex = 0;
         game.CurrentPlayerIndex = 1 % game.Players.Count;
     }
+
+    private int MaxCardsPerHand(int playerCount) =>
+        _deckService.TrimDeck(_deckService.BuildDeck(), playerCount).Count / playerCount;
 
     private void SetupRound(Game game, int cardsDealt)
     {
@@ -104,7 +106,7 @@ public class GameService
             game.DealerIndex = (game.DealerIndex + 1) % game.Players.Count;
             game.CurrentPlayerIndex = (game.DealerIndex + 1) % game.Players.Count;
 
-            SetupRound(game, game.CurrentRound);
+            SetupRound(game, MaxCardsPerHand(game.Players.Count));
             game.Status = GameStatus.Bidding;
         }
     }

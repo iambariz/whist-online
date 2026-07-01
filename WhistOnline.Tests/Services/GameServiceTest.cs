@@ -96,7 +96,7 @@ public class GameServiceTests
     }
 
     [Fact]
-    public void StartGame_DealsOneCardPerPlayer_ForRoundOne()
+    public void StartGame_DealsFullHand_ForRoundOne()
     {
         var db = CreateDb();
         var game = CreateGameWithPlayers(db, 4);
@@ -105,11 +105,11 @@ public class GameServiceTests
         var result = service.StartGame(game.Id, game.Players[0].Id);
 
         Assert.NotNull(result);
-        Assert.All(result.Players, p => Assert.Single(p.Hand));
+        Assert.All(result.Players, p => Assert.Equal(13, p.Hand.Count)); // 52 / 4 = 13
     }
 
     [Fact]
-    public void StartGame_SetsTotalRounds_BasedOnPlayerCount()
+    public void StartGame_SetsTotalRounds_ToFive()
     {
         var db = CreateDb();
         var game = CreateGameWithPlayers(db, 4);
@@ -118,7 +118,7 @@ public class GameServiceTests
         var result = service.StartGame(game.Id, game.Players[0].Id);
 
         Assert.NotNull(result);
-        Assert.Equal(13, result.TotalRounds); // 52 / 4 = 13
+        Assert.Equal(5, result.TotalRounds); // 4 suits + 1 no-trump round
     }
 
     [Fact]
@@ -133,7 +133,7 @@ public class GameServiceTests
         Assert.NotNull(result);
         Assert.Single(result.Rounds);
         Assert.Equal(1, result.Rounds[0].RoundNumber);
-        Assert.Equal(1, result.Rounds[0].CardsDealt);
+        Assert.Equal(13, result.Rounds[0].CardsDealt); // full hand: 52 / 4
     }
 
     // GetGameState tests
@@ -189,7 +189,7 @@ public class GameServiceTests
 
         Assert.NotNull(result);
         Assert.NotNull(result.MyHand);
-        Assert.Single(result.MyHand!);
+        Assert.Equal(13, result.MyHand!.Count); // full hand: 52 / 4
     }
 
     [Fact]
@@ -204,7 +204,7 @@ public class GameServiceTests
         var result = service.GetGameState(game.Id, playerId);
 
         Assert.NotNull(result);
-        Assert.All(result.Players!, p => Assert.Equal(1, p.CardCount));
+        Assert.All(result.Players!, p => Assert.Equal(13, p.CardCount)); // full hand: 52 / 4
     }
 
     // AdvanceRound tests
@@ -271,7 +271,7 @@ public class GameServiceTests
 
         Assert.Single(game.Rounds);
         Assert.Equal(2, game.Rounds[0].RoundNumber);
-        Assert.Equal(2, game.Rounds[0].CardsDealt);
+        Assert.Equal(13, game.Rounds[0].CardsDealt); // full hand: 52 / 4
     }
 
     [Fact]
@@ -283,7 +283,7 @@ public class GameServiceTests
 
         service.AdvanceRound(game);
 
-        Assert.All(game.Players, p => Assert.Equal(2, p.Hand.Count));
+        Assert.All(game.Players, p => Assert.Equal(13, p.Hand.Count)); // full hand: 52 / 4
     }
 
     [Fact]
